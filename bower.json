@@ -1,0 +1,17 @@
+{
+    "name": "ai",
+    "version": "0.0.1",
+    "main": "ai.js",
+    "scripts": [
+        "ai.js"
+    ],
+    "ignore": [
+        ".DS_Store",
+        ".git",
+        ".gitignore",
+        ".npmignore",
+        "node_modules",
+        "package.json",
+        "src"
+    ]
+}

@@ -1,0 +1,35 @@
+{
+    "name": "ai",
+    "version": "0.0.1",
+    "description": "Anything and everything artificial intelligence.",
+    "keywords": [
+        "ai",
+        "artificial intelligence",
+        "machine learning"
+    ],
+    "author": {
+        "name": "Matt Traynham"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mtraynham/ai.git"
+    },
+    "main": "ai.js",
+    "dependencies": {
+        "browserify": "~4.2.0",
+        "coffeeify": "~0.6.0",
+        "gulp": "~3.8.6",
+        "gulp-bump": "~0.1.10",
+        "gulp-coffeelint": "~0.3.3",
+        "gulp-rename": "~1.2.0",
+        "gulp-uglify": "~0.3.1",
+        "gulp-streamify": "0.0.5",
+        "vinyl-source-stream": "~0.1.1"
+    },
+    "licenses": [
+        {
+            "type": "Apache v2",
+            "url": "https://github.com/mtraynham/ai/blob/master/LICENSE"
+        }
+    ]
+}
