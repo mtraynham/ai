@@ -1,7 +1,8 @@
 ai =
     version: '0.0.1'
 
-ai.util = require './util.coffee'
+ai.bio = require './bio/index.coffee'
+ai.ml = require './ml/index.coffee'
 
 if typeof define == 'function' and define.amd
     define ai
