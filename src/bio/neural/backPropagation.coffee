@@ -44,11 +44,11 @@ transferDerivative = (output) -> output * (1.0 - output)
  * Forward propagate
  * @param  {[[]]} network
  * @param  {[]} vector
- * @return {Neuron}
+ * @return {Float}
 ###
 forwardPropagate = (network, vector) ->
     network.forEach (layer, i) ->
-        input = if i == 0 then vector else network[i - 1].map (neuron, j) -> network[i - 1][j].output
+        input = if i == 0 then vector else network[i - 1].map (neuron) -> neuron.output
         layer.forEach (neuron) ->
             neuron.activation = activate(neuron.weights, input)
             neuron.output = transfer(neuron.activation)
@@ -62,15 +62,14 @@ forwardPropagate = (network, vector) ->
 backwardPropagateError = (network, expectedOutput) ->
     i = network.length
     while i--
-        idx = network.length - 1 - i
-        if idx == network.length - 1
-            neuron = network[idx][0]
+        if i == network.length - 1
+            neuron = network[i][0]
             error = expectedOutput - neuron.output
-            neuron.delta = error * transfer_derivative(neuron.output)
+            neuron.delta = error * transferDerivative(neuron.output)
         else
-            network[idx].forEach (neuron, j) ->
+            network[i].forEach (neuron, j) ->
                 neuron.delta = transferDerivative(neuron.output) *
-                    network[idx + 1].reduce (prev, nextNeuron) ->
+                    network[i + 1].reduce (prev, nextNeuron) ->
                         p += nextNeuron.weights[j] * nextNeuron.delta
                     , 0
 
