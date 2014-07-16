@@ -2,7 +2,7 @@
 # http://en.wikipedia.org/wiki/Bees_algorithm
 ###
 
-randomVector = require('../../util/randomVector.coffee')
+randomVector = require '../../util/randomVector.coffee'
 
 class Bee
     constructor: (@vector, @fitness) ->
@@ -22,7 +22,7 @@ objectiveFn = (vector) ->
  * @param  {[[]]} searchSpace
  * @return {Bee}
 ###
-createRandomBee = (searchSpace) -> new Bee(randomVector(searchSpace))
+createRandomBee = (searchSpace) -> new Bee randomVector searchSpace
 
 ###*
  * Create a neighbor bee
@@ -32,12 +32,12 @@ createRandomBee = (searchSpace) -> new Bee(randomVector(searchSpace))
  * @return {Bee}
 ###
 createNeighborBee = (site, patchSize, searchSpace) ->
-    new Bee(site.map (cur, i) ->
+    new Bee site.map (cur, i) ->
         cur = if Math.random() < 0.5 then cur + Math.random() * patchSize else cur - Math.random() * patchSize
         cur = searchSpace[i][0] if cur < searchSpace[i][0]
         cur = searchSpace[i][1] if cur > searchSpace[i][1]
         cur
-    )
+
 
 ###*
  * Create scout bees
@@ -48,7 +48,7 @@ createNeighborBee = (site, patchSize, searchSpace) ->
 createScoutBees = (searchSpace, numberOfScouts) ->
     i = numberOfScouts
     while i--
-        createRandomBee(searchSpace)
+        createRandomBee searchSpace
 
 ###*
  * Search neighbor bees
@@ -62,8 +62,8 @@ searchNeighborBees = (parent, neighborSize, patchSize, searchSpace) ->
     i = patchSize
     neighborBees = []
     while i--
-        bee = createNeighborBee(parent.vector, patchSize, searchSpace)
-        bee.fitness = objectiveFn(bee.vector)
+        bee = createNeighborBee parent.vector, patchSize, searchSpace
+        bee.fitness = objectiveFn bee.vector
         neighborBees.push bee
     (neighborBees.sort (a, b) -> a - b)[0]
 
@@ -85,7 +85,7 @@ search = (maxGens, searchSpace, numberOfBees, numberOfSites, eliteSites, patchSi
     j = maxGens
     population = []
     while i--
-        population.push createRandomBee(searchSpace)
+        population.push createRandomBee searchSpace
     while j--
         population.forEach (cur) -> cur.fitness = objectiveFn cur.vector
         population.sort (a, b) -> a.fitness - b.fitness

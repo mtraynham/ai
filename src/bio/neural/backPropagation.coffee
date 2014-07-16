@@ -1,4 +1,4 @@
-randomVector = require('../../util/randomVector.coffee')
+randomVector = require '../../util/randomVector.coffee'
 
 class Neuron
     constructor: (@weights, @activation) ->
@@ -13,7 +13,7 @@ initWeights = (numberOfWeights) ->
     minmax = []
     while i--
         minmax.push [-Math.random(), Math.random()]
-    randomVector(minmax)
+    randomVector minmax
 
 ###*
  * Activate
@@ -31,7 +31,7 @@ activate = (weights, vector) ->
  * @param  {Float} activation
  * @return {Float}
 ###
-transfer = (activation) -> 1.0 / (1.0 + Math.exp(-activation))
+transfer = (activation) -> 1.0 / (1.0 + Math.exp -activation)
 
 ###*
  * Transfer derivative
@@ -50,8 +50,8 @@ forwardPropagate = (network, vector) ->
     network.forEach (layer, i) ->
         input = if i == 0 then vector else network[i - 1].map (neuron) -> neuron.output
         layer.forEach (neuron) ->
-            neuron.activation = activate(neuron.weights, input)
-            neuron.output = transfer(neuron.activation)
+            neuron.activation = activate neuron.weights, input
+            neuron.output = transfer neuron.activation
     network[network.length - 1][0].output
 
 ###*
@@ -65,12 +65,12 @@ backwardPropagateError = (network, expectedOutput) ->
         if i == network.length - 1
             neuron = network[i][0]
             error = expectedOutput - neuron.output
-            neuron.delta = error * transferDerivative(neuron.output)
+            neuron.delta = error * transferDerivative neuron.output
         else
             network[i].forEach (neuron, j) ->
-                neuron.delta = transferDerivative(neuron.output) *
+                neuron.delta = transferDerivative neuron.output *
                     network[i + 1].reduce (prev, nextNeuron) ->
-                        p += nextNeuron.weights[j] * nextNeuron.delta
+                        prev += nextNeuron.weights[j] * nextNeuron.delta
                     , 0
 
 ###*
@@ -116,9 +116,9 @@ trainNetwork = (network, domain, numberOfInputs, iterations, lrate) ->
         domain.forEach (pattern) ->
             # TODO vector,expected=Array.new(num_inputs){|k|pattern[k].to_f},pattern.last
             output = forwardPropagate network, vector
-            backwardPropagateError network. expected
-            calculateErrorDerivativesForWeights(network, vector)
-        updateWeights(network, lrate)
+            backwardPropagateError network, expected
+            calculateErrorDerivativesForWeights network, vector
+        updateWeights network, lrate
 
 ###*
  * Test the network
@@ -131,7 +131,7 @@ testNetwork = (network, domain, numberOfInputs) ->
     correct = 0
     domain.forEach (pattern) ->
         # TODO input_vector = Array.new(num_inputs) {|k| pattern[k].to_f}
-        output = forwardPropagate(network, inputVector)
+        output = forwardPropagate network, inputVector
         correct += 1 if output.round == pattern[pattern.length - 1]
     correct
 
@@ -141,7 +141,7 @@ testNetwork = (network, domain, numberOfInputs) ->
  * @return {Neuron}
 ###
 createNeuron = (numberOfInputs) ->
-    new Neuron(initWeights(numberOfInputs + 1))
+    new Neuron initWeights numberOfInputs + 1
     #   return {:weights=>initialize_weights(num_inputs+1),
     #           :last_delta=>Array.new(num_inputs+1){0.0},
     #           :deriv=>Array.new(num_inputs+1){0.0}}
@@ -159,10 +159,10 @@ execute = (domain, numberOfInputs, iterations, numberOfNodes, lrate) ->
     network = []
     i = numberOfNodes
     while i--
-        network.push createNeuron(numberOfInputs)
-    network.push createNeuron(network[network.length - 1].length)
-    trainNetwork(network, domain, numberOfInputs, iterations, lrate)
-    testNetwork(network, domain, numberOfInputs)
+        network.push createNeuron numberOfInputs
+    network.push createNeuron network[network.length - 1].length
+    trainNetwork network, domain, numberOfInputs, iterations, lrate
+    testNetwork network, domain, numberOfInputs
     network
 
 module.exports = execute
