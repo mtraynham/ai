@@ -141,7 +141,7 @@ testNetwork = (network, domain, numberOfInputs) ->
  * @return {Neuron}
 ###
 createNeuron = (numberOfInputs) ->
-    new Neuron initWeights numberOfInputs + 1, fillArray(0, numberOfInputs + 1), fillArray(0, numberOfInputs + 1)
+    new Neuron initWeights(numberOfInputs + 1), fillArray(0, numberOfInputs + 1), fillArray(0, numberOfInputs + 1)
 
 ###*
  * Execute back propagation
