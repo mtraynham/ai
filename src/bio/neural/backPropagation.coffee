@@ -19,18 +19,9 @@ transfer = (a) -> 1.0 / (1.0 + Math.exp(-a))
 
 transferDerivative = (o) -> o * (1.0 - o)
 
-# def forward_propagate(net, vector)
-#   net.each_with_index do |layer, i|
-#     input=(i==0)? vector : Array.new(net[i-1].size){|k|net[i-1][k][:output]}
-#     layer.each do |neuron|
-#       neuron[:activation] = activate(neuron[:weights], input)
-#       neuron[:output] = transfer(neuron[:activation])
-#     end
-#   end
-#   return net.last[0][:output]
-# end
 forwardPropagate = (n, v) ->
     n.forEach (l, i) ->
+        #     input=(i==0)? vector : Array.new(net[i-1].size){|k|net[i-1][k][:output]}
         inp = if i is 0 then vector else
         l.forEach (ne) ->
             ne.activation = activate(ne.weights, inp)
@@ -52,52 +43,26 @@ backwardPropagateError = (n, eo) ->
                         p += nne.weights[j] * nne.delta
                     , 0
 
+calculateErrorDerivativesForWeights = (n, v) ->
+    n.forEach (l, i) ->
+        #     input=(i==0)? vector : Array.new(net[i-1].size){|k|net[i-1][k][:output]}
+        inp = if i == 0 then vector else
+        l.forEach (ne) ->
+            inp.forEach (s, j) ->
+                ne.deriv[j] += ne.delta * s
+            ne.deriv[ne.deriv.length - 1] += ne.delta
 
+updateWeights = (n, lr, m) ->
+    n.forEach (l) ->
+        l.forEach (ne) ->
+            ne.weights.forEach (w, i) ->
+                d = lr * ne.deriv[i] + ne.ldelta[i] * m
+                n.weights[i] += d
+                n.ldelta[i] = d
+                n.deriv[i] = 0.0
 
-# def backward_propagate_error(network, expected_output)
-#   network.size.times do |n|
-#     index = network.size - 1 - n
-#     if index == network.size-1
-#       neuron = network[index][0] # assume one node in output layer
-#       error = (expected_output - neuron[:output])
-#       neuron[:delta] = error * transfer_derivative(neuron[:output])
-#     else
-#       network[index].each_with_index do |neuron, k|
-#         sum = 0.0
-#         # only sum errors weighted by connection to the current k'th neuron
-#         network[index+1].each do |next_neuron|
-#           sum += (next_neuron[:weights][k] * next_neuron[:delta])
-#         end
-#         neuron[:delta] = sum * transfer_derivative(neuron[:output])
-#       end
-#     end
-#   end
-# end
+trainNetwork = (n, d, ni, i, lr) ->
 
-# def calculate_error_derivatives_for_weights(net, vector)
-#   net.each_with_index do |layer, i|
-#     input=(i==0)? vector : Array.new(net[i-1].size){|k|net[i-1][k][:output]}
-#     layer.each do |neuron|
-#       input.each_with_index do |signal, j|
-#         neuron[:deriv][j] += neuron[:delta] * signal
-#       end
-#       neuron[:deriv][-1] += neuron[:delta] * 1.0
-#     end
-#   end
-# end
-
-# def update_weights(network, lrate, mom=0.8)
-#   network.each do |layer|
-#     layer.each do |neuron|
-#       neuron[:weights].each_with_index do |w, j|
-#         delta = (lrate * neuron[:deriv][j]) + (neuron[:last_delta][j] * mom)
-#         neuron[:weights][j] += delta
-#         neuron[:last_delta][j] = delta
-#         neuron[:deriv][j] = 0.0
-#       end
-#     end
-#   end
-# end
 
 # def train_network(network, domain, num_inputs, iterations, lrate)
 #   correct = 0
