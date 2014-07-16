@@ -3,6 +3,7 @@ ai =
 
 ai.bio = require './bio/index.coffee'
 ai.ml = require './ml/index.coffee'
+ai.util = require './util/index.coffee'
 
 if typeof define == 'function' and define.amd
     define ai
