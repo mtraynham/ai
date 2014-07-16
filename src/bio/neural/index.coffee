@@ -1,1 +1,1 @@
-exports.back-propagation = require './backPropagation.coffee'
+exports.backPropagation = require './backPropagation.coffee'

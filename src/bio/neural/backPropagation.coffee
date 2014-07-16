@@ -1,68 +1,116 @@
-randVector = require('../../util/randVector.coffee')
+randomVector = require('../../util/randomVector.coffee')
 
 class Neuron
     constructor: (@weights, @activation) ->
 
-initWeights = (n) ->
-    i = n
-    mm = []
+###*
+ * Initialize weights
+ * @param  {Integer} numberOfWeights
+ * @return {[]}
+###
+initWeights = (numberOfWeights) ->
+    i = numberOfWeights
+    minmax = []
     while i--
-        mm.push [-Math.random(), Math.random()]
-    randVector(mm)
+        minmax.push [-Math.random(), Math.random()]
+    randomVector(minmax)
 
-activate = (w, v) ->
-    v.reduce (p, c, i) ->
-        p += w[i] * c
-    , 0
+###*
+ * Activate
+ * @param  {[]} weights
+ * @param  {[]} vector
+ * @return {Float}
+###
+activate = (weights, vector) ->
+    vector.reduce (prev, cur, i) ->
+        prev += weights[i] * cur
+    , 0.0
 
-transfer = (a) -> 1.0 / (1.0 + Math.exp(-a))
+###*
+ * Transfer
+ * @param  {Float} activation
+ * @return {Float}
+###
+transfer = (activation) -> 1.0 / (1.0 + Math.exp(-activation))
 
-transferDerivative = (o) -> o * (1.0 - o)
+###*
+ * Transfer derivative
+ * @param  {Float} output
+ * @return {Float}
+###
+transferDerivative = (output) -> output * (1.0 - output)
 
-forwardPropagate = (n, v) ->
-    n.forEach (l, i) ->
-        #     input=(i==0)? vector : Array.new(net[i-1].size){|k|net[i-1][k][:output]}
-        inp = if i is 0 then vector else
-        l.forEach (ne) ->
-            ne.activation = activate(ne.weights, inp)
-            ne.output = transfer(ne.activation)
-    n[n.length - 1][0].output
+###*
+ * Forward propagate
+ * @param  {[[]]} network
+ * @param  {[]} vector
+ * @return {Neuron}
+###
+forwardPropagate = (network, vector) ->
+    network.forEach (layer, i) ->
+        input = if i == 0 then vector else network[i - 1].map (neuron, j) -> network[i - 1][j].output
+        layer.forEach (neuron) ->
+            neuron.activation = activate(neuron.weights, input)
+            neuron.output = transfer(neuron.activation)
+    network[network.length - 1][0].output
 
-backwardPropagateError = (n, eo) ->
-    i = n.length
+###*
+ * Back propapate error
+ * @param  {[[]]} network
+ * @param  {Float} expectedOutput
+###
+backwardPropagateError = (network, expectedOutput) ->
+    i = network.length
     while i--
-        idx = n.length - 1 - i
-        if idx == n.length - 1
-            ne = n[idx][0]
-            e = eo - ne.output
-            n.delta = e * transfer_derivative(n.output)
+        idx = network.length - 1 - i
+        if idx == network.length - 1
+            neuron = network[idx][0]
+            error = expectedOutput - neuron.output
+            neuron.delta = error * transfer_derivative(neuron.output)
         else
-            n[idx].forEach (ne, j) ->
-                n.delta = transferDerivative(ne.output) *
-                    n[idx + 1].reduce (p, nne) ->
-                        p += nne.weights[j] * nne.delta
+            network[idx].forEach (neuron, j) ->
+                neuron.delta = transferDerivative(neuron.output) *
+                    network[idx + 1].reduce (prev, nextNeuron) ->
+                        p += nextNeuron.weights[j] * nextNeuron.delta
                     , 0
 
-calculateErrorDerivativesForWeights = (n, v) ->
-    n.forEach (l, i) ->
-        #     input=(i==0)? vector : Array.new(net[i-1].size){|k|net[i-1][k][:output]}
-        inp = if i == 0 then vector else
-        l.forEach (ne) ->
-            inp.forEach (s, j) ->
-                ne.deriv[j] += ne.delta * s
-            ne.deriv[ne.deriv.length - 1] += ne.delta
+###*
+ * Calculate error derivatives for weights
+ * @param  {[[]]} network
+ * @param  {[]} vector
+###
+calculateErrorDerivativesForWeights = (network, vector) ->
+    network.forEach (layer, i) ->
+        input = if i == 0 then vector else network[i - 1].map (neuron, j) -> network[i - 1][j].output
+        layer.forEach (neuron) ->
+            input.forEach (signal, j) ->
+                neuron.deriv[j] += neuron.delta * signal
+            neuron.deriv[neuron.deriv.length - 1] += neuron.delta
 
-updateWeights = (n, lr, m) ->
-    n.forEach (l) ->
-        l.forEach (ne) ->
-            ne.weights.forEach (w, i) ->
-                d = lr * ne.deriv[i] + ne.ldelta[i] * m
-                n.weights[i] += d
-                n.ldelta[i] = d
-                n.deriv[i] = 0.0
+###*
+ * Update the weights
+ * @param  {[[]]} network
+ * @param  {Float} lrate
+ * @param  {Float} momentum
+###
+updateWeights = (network, lrate, momentum) ->
+    momentum = momentum || 0.8
+    network.forEach (layer) ->
+        layer.forEach (neuron) ->
+            neuron.weights.forEach (weight, i) ->
+                delta = lrate * neuron.deriv[i] + neuron.lastDelta[i] * momentum
+                neuron.weights[i] += delta
+                neuron.lastDelta[i] = delta
+                neuron.deriv[i] = 0.0
 
-trainNetwork = (n, d, ni, i, lr) ->
-
+trainNetwork = (n, d, ni, it, lr) ->
+    correct = 0
+    i = it
+    while i--
+        d.forEach (p) ->
+            exp
+    i.forEach (e) ->
+        d.forEach()
 
 # def train_network(network, domain, num_inputs, iterations, lrate)
 #   correct = 0

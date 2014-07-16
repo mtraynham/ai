@@ -2,101 +2,102 @@
 # http://en.wikipedia.org/wiki/Bees_algorithm
 ###
 
-randVector = require('../../util/randVector.coffee')
+randomVector = require('../../util/randomVector.coffee')
 
 class Bee
     constructor: (@vector, @fitness) ->
 
 ###*
- * Objective Function
- * @param  {[]} v vector
+ * Objective function
+ * @param  {[]} vector
  * @return {[]}
 ###
-objFn = (v) ->
-    v.reduce (a, b) ->
-        a + b * 2
+objectiveFn = (vector) ->
+    vector.reduce (prev, cur) ->
+        prev + cur * 2
     , 0
 
 ###*
  * Create a random bee
- * @param  {[[]]} ss search space
+ * @param  {[[]]} searchSpace
  * @return {Bee}
 ###
-randBee = (ss) -> new Bee(randVector(ss))
+createRandomBee = (searchSpace) -> new Bee(randomVector(searchSpace))
 
 ###*
  * Create a neighbor bee
- * @param  {[]} s  site
- * @param  {Integer} p  patch size
- * @param  {[[]]} ss search space
+ * @param  {[]} site
+ * @param  {Integer} patchSize
+ * @param  {[[]]} searchSpace
  * @return {Bee}
 ###
-neighBee = (s, p, ss) ->
-    new Bee(s.map (a, i) ->
-        a = if Math.random() < 0.5 then a + Math.random() * p else a - Math.random() * p
-        a = ss[i][0] if a < ss[i][0]
-        a = ss[i][1] if a > ss[i][1]
-        a
+createNeighborBee = (site, patchSize, searchSpace) ->
+    new Bee(site.map (cur, i) ->
+        cur = if Math.random() < 0.5 then cur + Math.random() * patchSize else cur - Math.random() * patchSize
+        cur = searchSpace[i][0] if cur < searchSpace[i][0]
+        cur = searchSpace[i][1] if cur > searchSpace[i][1]
+        cur
     )
 
 ###*
- * Search neighbor bees
- * @param  {Bee} p  parent
- * @param  {Integer} ns neighbor size
- * @param  {Integer} ps patch size
- * @param  {[[]]} ss search space
- * @return {Bee}
+ * Create scout bees
+ * @param  {[[]]} searchSpace
+ * @param  {Integer} numberOfScouts
+ * @return {Bee[]}
 ###
-searchNeigh = (p, ns, ps, ss) ->
-    i = ps
-    bs = []
+createScoutBees = (searchSpace, numberOfScouts) ->
+    i = numberOfScouts
     while i--
-        a = neighBee(p.vector, ps, ss)
-        a.fitness = objFn(a.vector)
-        bs.push a
-    (bs.sort (b, c) -> b - c)[0]
+        createRandomBee(searchSpace)
 
 ###*
- * Create scout bee
- * @param  {[[]]} ss search space
- * @param  {Integer} ns number of scouts
- * @return {Bee[]}    [description]
+ * Search neighbor bees
+ * @param  {Bee} parent
+ * @param  {Integer} neighborSize
+ * @param  {Integer} patchSize
+ * @param  {[[]]} searchSpace
+ * @return {Bee}
 ###
-scoutBees = (ss, ns) ->
-    i = ns
+searchNeighborBees = (parent, neighborSize, patchSize, searchSpace) ->
+    i = patchSize
+    neighborBees = []
     while i--
-        randBee(ss)
+        bee = createNeighborBee(parent.vector, patchSize, searchSpace)
+        bee.fitness = objectiveFn(bee.vector)
+        neighborBees.push bee
+    (neighborBees.sort (a, b) -> a - b)[0]
 
 ###*
  * Search
- * @param  {Integer} mg max gens
- * @param  {[[]]} ss search space
- * @param  {Integer} nb number of bees
- * @param  {Integer} ns number of sites
- * @param  {Integer} es elite sites
- * @param  {Integer} ps patch size
- * @param  {Integer} eb elite bees
- * @param  {Integer} ob ordinary bees
+ * @param  {Integer} maxGens
+ * @param  {[[]]} searchSpace
+ * @param  {Integer} numberOfBees
+ * @param  {Integer} numberOfSites
+ * @param  {Integer} eliteSites
+ * @param  {Integer} patchSize
+ * @param  {Integer} eliteBees
+ * @param  {Integer} otherBees
  * @return {Bee}
 ###
-search = (mg, ss, nb, ns, es, ps, eb, ob) ->
-    b = null
-    i = nb
-    j = mg
-    k = ns
-    p = []
+search = (maxGens, searchSpace, numberOfBees, numberOfSites, eliteSites, patchSize, eliteBees, otherBees) ->
+    best = null
+    i = numberOfBees
+    j = maxGens
+    population = []
     while i--
-        p.push randBee(ss)
+        population.push createRandomBee(searchSpace)
     while j--
-        p.forEach (b) -> b.fitness = objFn b.vector
-        p.sort (a, b) -> a.fitness - b.fitness
-        b = p[0] if !b or p[0].fitness < b.fitness
+        population.forEach (cur) -> cur.fitness = objectiveFn cur.vector
+        population.sort (a, b) -> a.fitness - b.fitness
+        best = population[0] if !b or population[0].fitness < best.fitness
         nextGen = []
+        k = numberOfSites
         while k--
-            nextGen.push searchNeigh parent, (if i < es then eb else ob), ps, ss
-        s = scoutBees ss, (nb - ns)
-        p = nextGen.concat s
-        ps = ps * 0.95
-    b
+            nextGen.push searchNeighborBees parent, (if i < eliteSites then eliteBees else otherBees)
+                , patchSize, searchSpace
+        scoutBees = createScoutBees searchSpace, (numberOfBees - numberOfSites)
+        population = nextGen.concat scoutBees
+        patchSize = patchSize * 0.95
+    best
 
 module.exports = search

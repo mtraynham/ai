@@ -1,1 +1,1 @@
-exports.randVector = require './randVector.coffee'
+exports.randVector = require './randomVector.coffee'
