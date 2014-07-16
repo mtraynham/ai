@@ -89,7 +89,7 @@ search = (maxGens, searchSpace, numberOfBees, numberOfSites, eliteSites, patchSi
     while j--
         population.forEach (cur) -> cur.fitness = objectiveFn cur.vector
         population.sort (a, b) -> a.fitness - b.fitness
-        best = population[0] if !b or population[0].fitness < best.fitness
+        best = population[0] if !best or population[0].fitness < best.fitness
         nextGen = []
         k = numberOfSites
         while k--
