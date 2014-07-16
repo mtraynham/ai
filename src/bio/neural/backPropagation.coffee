@@ -103,56 +103,67 @@ updateWeights = (network, lrate, momentum) ->
                 neuron.lastDelta[i] = delta
                 neuron.deriv[i] = 0.0
 
-trainNetwork = (n, d, ni, it, lr) ->
-    correct = 0
-    i = it
+###*
+ * Train the network
+ * @param  {[[]]} network
+ * @param  {[]} domain
+ * @param  {Integer} numberOfInputs
+ * @param  {Integer} iterations
+ * @param  {Float} lrate
+###
+trainNetwork = (network, domain, numberOfInputs, iterations, lrate) ->
+    i = iterations
     while i--
-        d.forEach (p) ->
-            exp
-    i.forEach (e) ->
-        d.forEach()
+        domain.forEach (pattern) ->
+            # TODO vector,expected=Array.new(num_inputs){|k|pattern[k].to_f},pattern.last
+            output = forwardPropagate network, vector
+            backwardPropagateError network. expected
+            calculateErrorDerivativesForWeights(network, vector)
+        updateWeights(network, lrate)
 
-# def train_network(network, domain, num_inputs, iterations, lrate)
-#   correct = 0
-#   iterations.times do |epoch|
-#     domain.each do |pattern|
-#       vector,expected=Array.new(num_inputs){|k|pattern[k].to_f},pattern.last
-#       output = forward_propagate(network, vector)
-#       correct += 1 if output.round == expected
-#       backward_propagate_error(network, expected)
-#       calculate_error_derivatives_for_weights(network, vector)
-#     end
-#     update_weights(network, lrate)
-#     if (epoch+1).modulo(100) == 0
-#       puts "> epoch=#{epoch+1}, Correct=#{correct}/#{100*domain.size}"
-#       correct = 0
-#     end
-#   end
-# end
+###*
+ * Test the network
+ * @param  {[[]]} network
+ * @param  {[]} domain
+ * @param  {Integer} numberOfInputs
+ * @return {Integer}
+###
+testNetwork = (network, domain, numberOfInputs) ->
+    correct = 0
+    domain.forEach (pattern) ->
+        # TODO input_vector = Array.new(num_inputs) {|k| pattern[k].to_f}
+        output = forwardPropagate(network, inputVector)
+        correct += 1 if output.round == pattern[pattern.length - 1]
+    correct
 
-# def test_network(network, domain, num_inputs)
-#   correct = 0
-#   domain.each do |pattern|
-#     input_vector = Array.new(num_inputs) {|k| pattern[k].to_f}
-#     output = forward_propagate(network, input_vector)
-#     correct += 1 if output.round == pattern.last
-#   end
-#   puts "Finished test with a score of #{correct}/#{domain.length}"
-#   return correct
-# end
+###*
+ * Create a neuron
+ * @param  {Integer} numberOfInputs
+ * @return {Neuron}
+###
+createNeuron = (numberOfInputs) ->
+    new Neuron(initWeights(numberOfInputs + 1))
+    #   return {:weights=>initialize_weights(num_inputs+1),
+    #           :last_delta=>Array.new(num_inputs+1){0.0},
+    #           :deriv=>Array.new(num_inputs+1){0.0}}
 
-# def create_neuron(num_inputs)
-#   return {:weights=>initialize_weights(num_inputs+1),
-#           :last_delta=>Array.new(num_inputs+1){0.0},
-#           :deriv=>Array.new(num_inputs+1){0.0}}
-# end
+###*
+ * Execute back propagation
+ * @param  {[]} domain
+ * @param  {Integer} numberOfInputs
+ * @param  {Integer} iterations
+ * @param  {Integer} numberOfNodes
+ * @param  {Float} lrate
+ * @return {[[]]}
+###
+execute = (domain, numberOfInputs, iterations, numberOfNodes, lrate) ->
+    network = []
+    i = numberOfNodes
+    while i--
+        network.push createNeuron(numberOfInputs)
+    network.push createNeuron(network[network.length - 1].length)
+    trainNetwork(network, domain, numberOfInputs, iterations, lrate)
+    testNetwork(network, domain, numberOfInputs)
+    network
 
-# def execute(domain, num_inputs, iterations, num_nodes, lrate)
-#   network = []
-#   network << Array.new(num_nodes){create_neuron(num_inputs)}
-#   network << Array.new(1){create_neuron(network.last.size)}
-#   puts "Topology: #{num_inputs} #{network.inject(""){|m,i|m+"#{i.size} "}}"
-#   train_network(network, domain, num_inputs, iterations, lrate)
-#   test_network(network, domain, num_inputs)
-#   return network
-# end
+module.exports = execute
