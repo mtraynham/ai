@@ -14,7 +14,7 @@ class Bee
 ###
 objectiveFn = (vector) ->
     vector.reduce (prev, cur) ->
-        prev + cur * 2
+        prev + Math.pow(cur, 2)
     , 0
 
 ###*
@@ -37,7 +37,6 @@ createNeighborBee = (site, patchSize, searchSpace) ->
         cur = searchSpace[i][0] if cur < searchSpace[i][0]
         cur = searchSpace[i][1] if cur > searchSpace[i][1]
         cur
-
 
 ###*
  * Create scout bees

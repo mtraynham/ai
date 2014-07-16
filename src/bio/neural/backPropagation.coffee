@@ -1,7 +1,8 @@
 randomVector = require '../../util/randomVector.coffee'
+fillArray = require '../../util/fillArray.coffee'
 
 class Neuron
-    constructor: (@weights, @activation) ->
+    constructor: (@weights, @lastDelta, @deriv) ->
 
 ###*
  * Initialize weights
@@ -114,10 +115,10 @@ trainNetwork = (network, domain, numberOfInputs, iterations, lrate) ->
     i = iterations
     while i--
         domain.forEach (pattern) ->
-            # TODO vector,expected=Array.new(num_inputs){|k|pattern[k].to_f},pattern.last
-            output = forwardPropagate network, vector
+            expected = pattern[pattern.length -1]
+            output = forwardPropagate network, pattern
             backwardPropagateError network, expected
-            calculateErrorDerivativesForWeights network, vector
+            calculateErrorDerivativesForWeights network, pattern
         updateWeights network, lrate
 
 ###*
@@ -130,9 +131,8 @@ trainNetwork = (network, domain, numberOfInputs, iterations, lrate) ->
 testNetwork = (network, domain, numberOfInputs) ->
     correct = 0
     domain.forEach (pattern) ->
-        # TODO input_vector = Array.new(num_inputs) {|k| pattern[k].to_f}
-        output = forwardPropagate network, inputVector
-        correct += 1 if output.round == pattern[pattern.length - 1]
+        output = forwardPropagate network, pattern
+        correct += 1 if Math.round(output) == pattern[pattern.length - 1]
     correct
 
 ###*
@@ -141,10 +141,7 @@ testNetwork = (network, domain, numberOfInputs) ->
  * @return {Neuron}
 ###
 createNeuron = (numberOfInputs) ->
-    new Neuron initWeights numberOfInputs + 1
-    #   return {:weights=>initialize_weights(num_inputs+1),
-    #           :last_delta=>Array.new(num_inputs+1){0.0},
-    #           :deriv=>Array.new(num_inputs+1){0.0}}
+    new Neuron initWeights numberOfInputs + 1, fillArray(0, numberOfInputs + 1), fillArray(0, numberOfInputs + 1)
 
 ###*
  * Execute back propagation
