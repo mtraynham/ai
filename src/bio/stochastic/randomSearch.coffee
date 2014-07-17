@@ -1,23 +1,14 @@
 ###
-# http://en.wikipedia.org/wiki/Bees_algorithm
+# http://en.wikipedia.org/wiki/Random_search
 ###
 
 randomVector = require '../../util/randomVector.coffee'
+objectiveFn = require '../../util/objectiveFn.coffee'
 
 class Candidate
      constructor: (searchSpace) ->
-         @vector = randomVector(searchSpace)
-         @cost = objectiveFn(@vector)
-
-###*
- * Objective function
- * @param  {[]} vector
- * @return {[]}
-###
-objectiveFn = (vector) ->
-    vector.reduce (prev, cur) ->
-        prev + Math.pow(cur, 2)
-    , 0
+         @vector = randomVector searchSpace
+         @cost = objectiveFn @vector
 
 ###*
  * Search for best candidate
@@ -29,7 +20,7 @@ search = (searchSpace, maxIterations) ->
     best = null
     candidate = null
     while maxIterations--
-        candidate = new Candidate(searchSpace)
+        candidate = new Candidate searchSpace
         best = candidate if !best or candidate.cost < best.cost
     best
 

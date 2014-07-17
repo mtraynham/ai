@@ -258,7 +258,7 @@ execute = function(domain, numberOfInputs, iterations, numberOfNodes, lrate) {
 module.exports = execute;
 
 
-},{"../../util/fillArray.coffee":10,"../../util/randomVector.coffee":12}],3:[function(require,module,exports){
+},{"../../util/fillArray.coffee":10,"../../util/randomVector.coffee":13}],3:[function(require,module,exports){
 exports.backPropagation = require('./backPropagation.coffee');
 
 
@@ -269,11 +269,13 @@ exports.randomSearch = require('./randomSearch.coffee');
 },{"./randomSearch.coffee":5}],5:[function(require,module,exports){
 
 /*
- * http://en.wikipedia.org/wiki/Bees_algorithm
+ * http://en.wikipedia.org/wiki/Random_search
  */
 var Candidate, objectiveFn, randomVector, search;
 
 randomVector = require('../../util/randomVector.coffee');
+
+objectiveFn = require('../../util/objectiveFn.coffee');
 
 Candidate = (function() {
   function Candidate(searchSpace) {
@@ -284,19 +286,6 @@ Candidate = (function() {
   return Candidate;
 
 })();
-
-
-/**
- * Objective function
- * @param  {[]} vector
- * @return {[]}
- */
-
-objectiveFn = function(vector) {
-  return vector.reduce(function(prev, cur) {
-    return prev + Math.pow(cur, 2);
-  }, 0);
-};
 
 
 /**
@@ -322,7 +311,7 @@ search = function(searchSpace, maxIterations) {
 module.exports = search;
 
 
-},{"../../util/randomVector.coffee":12}],6:[function(require,module,exports){
+},{"../../util/objectiveFn.coffee":12,"../../util/randomVector.coffee":13}],6:[function(require,module,exports){
 
 /*
  * http://en.wikipedia.org/wiki/Bees_algorithm
@@ -330,6 +319,8 @@ module.exports = search;
 var Bee, createNeighborBee, createRandomBee, createScoutBees, objectiveFn, randomVector, search, searchNeighborBees;
 
 randomVector = require('../../util/randomVector.coffee');
+
+objectiveFn = require('../../util/objectiveFn.coffee');
 
 Bee = (function() {
   function Bee(vector, fitness) {
@@ -340,19 +331,6 @@ Bee = (function() {
   return Bee;
 
 })();
-
-
-/**
- * Objective function
- * @param  {[]} vector
- * @return {[]}
- */
-
-objectiveFn = function(vector) {
-  return vector.reduce(function(prev, cur) {
-    return prev + Math.pow(cur, 2);
-  }, 0);
-};
 
 
 /**
@@ -477,7 +455,7 @@ search = function(maxGens, searchSpace, numberOfBees, numberOfSites, eliteSites,
 module.exports = search;
 
 
-},{"../../util/randomVector.coffee":12}],7:[function(require,module,exports){
+},{"../../util/objectiveFn.coffee":12,"../../util/randomVector.coffee":13}],7:[function(require,module,exports){
 exports.bees = require('./bees.coffee');
 
 
@@ -528,10 +506,28 @@ module.exports = fillArray;
 },{}],11:[function(require,module,exports){
 exports.fillArray = require('./fillArray.coffee');
 
+exports.objectiveFn = require('./objectiveFn.coffee');
+
 exports.randomVector = require('./randomVector.coffee');
 
 
-},{"./fillArray.coffee":10,"./randomVector.coffee":12}],12:[function(require,module,exports){
+},{"./fillArray.coffee":10,"./objectiveFn.coffee":12,"./randomVector.coffee":13}],12:[function(require,module,exports){
+
+/**
+ * Objective function
+ * @param  {[]} vector
+ * @return {[]}
+ */
+var objectiveFn;
+
+objectiveFn = function(vector) {
+  return vector.reduce(function(prev, cur) {
+    return prev + Math.pow(cur, 2);
+  }, 0);
+};
+
+
+},{}],13:[function(require,module,exports){
 
 /**
  * Create a random vector

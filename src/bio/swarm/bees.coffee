@@ -3,19 +3,10 @@
 ###
 
 randomVector = require '../../util/randomVector.coffee'
+objectiveFn = require '../../util/objectiveFn.coffee'
 
 class Bee
     constructor: (@vector, @fitness) ->
-
-###*
- * Objective function
- * @param  {[]} vector
- * @return {[]}
-###
-objectiveFn = (vector) ->
-    vector.reduce (prev, cur) ->
-        prev + Math.pow(cur, 2)
-    , 0
 
 ###*
  * Create a random bee
