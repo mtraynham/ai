@@ -1,7 +1,7 @@
 ###*
  * Objective function
  * @param  {[]} vector
- * @return {[]}
+ * @return {Float}
 ###
 objectiveFn = (vector) ->
     vector.reduce (prev, cur) ->

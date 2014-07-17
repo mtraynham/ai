@@ -516,7 +516,7 @@ exports.randomVector = require('./randomVector.coffee');
 /**
  * Objective function
  * @param  {[]} vector
- * @return {[]}
+ * @return {Float}
  */
 var objectiveFn;
 
@@ -525,6 +525,8 @@ objectiveFn = function(vector) {
     return prev + Math.pow(cur, 2);
   }, 0);
 };
+
+module.exports = objectiveFn;
 
 
 },{}],13:[function(require,module,exports){
