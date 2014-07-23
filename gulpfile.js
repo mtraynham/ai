@@ -22,7 +22,8 @@ gulp.task('build', function () {
     })
     return bundler
         .transform(coffeeify)
-        .bundle({debug: true})
+        .bundle()
+        // .bundle({debug: true})
         .pipe(source('ai.js'))
         .pipe(gulp.dest('./'))
         .pipe(streamify(uglify()))
