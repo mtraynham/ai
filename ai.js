@@ -676,6 +676,17 @@ var BinarySearch;
 BinarySearch = (function() {
   function BinarySearch() {}
 
+
+  /**
+   * Perfroms a binary search
+   * @param  {[]} array
+   * @param  {*} value
+   * @param  {*} from
+   * @param  {*} to
+   * @param  {Function} comparator
+   * @return {Number} -1 or 2 for not found; 1 for found
+   */
+
   BinarySearch.binarySearchFromToComparator = function(array, value, from, to, comparator) {
     var mid, result;
     mid = -1;
@@ -695,6 +706,16 @@ BinarySearch = (function() {
       return (-mid) - (value < array[mid] ? 1 : 2);
     }
   };
+
+
+  /**
+   * Performs a binary search using a stand compartor
+   * @param  {[]} array
+   * @param  {*} value
+   * @param  {*} from
+   * @param  {*} to
+   * @return {Number} -1 or 2 for not found; 1 for found
+   */
 
   BinarySearch.binarySearchFromTo = function(array, value, from, to) {
     return this.constructor.binarySearchFromTo(array, value, from, to, function(a, b) {
