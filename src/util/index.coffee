@@ -1,4 +1,5 @@
 exports.arithmetic = require './arithmetic.coffee'
+exports.binarySearch = require './binarysearch.coffee'
 exports.constants = require './constants.coffee'
 exports.fillArray = require './fillArray.coffee'
 exports.objectiveFn = require './objectiveFn.coffee'

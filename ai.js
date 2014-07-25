@@ -258,7 +258,7 @@ execute = function(domain, numberOfInputs, iterations, numberOfNodes, lrate) {
 module.exports = execute;
 
 
-},{"../../util/fillArray.coffee":12,"../../util/randomVector.coffee":15}],3:[function(require,module,exports){
+},{"../../util/fillArray.coffee":13,"../../util/randomVector.coffee":16}],3:[function(require,module,exports){
 exports.backPropagation = require('./backPropagation.coffee');
 
 
@@ -311,7 +311,7 @@ search = function(searchSpace, maxIterations) {
 module.exports = search;
 
 
-},{"../../util/objectiveFn.coffee":14,"../../util/randomVector.coffee":15}],6:[function(require,module,exports){
+},{"../../util/objectiveFn.coffee":15,"../../util/randomVector.coffee":16}],6:[function(require,module,exports){
 
 /*
  * http://en.wikipedia.org/wiki/Bees_algorithm
@@ -455,7 +455,7 @@ search = function(maxGens, searchSpace, numberOfBees, numberOfSites, eliteSites,
 module.exports = search;
 
 
-},{"../../util/objectiveFn.coffee":14,"../../util/randomVector.coffee":15}],7:[function(require,module,exports){
+},{"../../util/objectiveFn.coffee":15,"../../util/randomVector.coffee":16}],7:[function(require,module,exports){
 exports.bees = require('./bees.coffee');
 
 
@@ -477,7 +477,7 @@ global.ai = ai;
 
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./bio/index.coffee":1,"./ml/index.coffee":9,"./util/index.coffee":13}],9:[function(require,module,exports){
+},{"./bio/index.coffee":1,"./ml/index.coffee":9,"./util/index.coffee":14}],9:[function(require,module,exports){
 
 
 
@@ -671,6 +671,49 @@ module.exports = Arithmetic;
 
 
 },{}],11:[function(require,module,exports){
+var BinarySearch;
+
+BinarySearch = (function() {
+  function BinarySearch() {}
+
+  BinarySearch.binarySearchFromToComparator = function(array, value, from, to, comparator) {
+    var mid, result;
+    mid = -1;
+    while (from <= to) {
+      mid = (from + to) >>> 1;
+      if (result = comparator(value, array[mid]) < 0) {
+        from = mid + 1;
+      } else if (result === 0) {
+        return mid;
+      } else {
+        to = mid - 1;
+      }
+    }
+    if (mid < 0) {
+      return -1;
+    } else {
+      return (-mid) - (value < array[mid] ? 1 : 2);
+    }
+  };
+
+  BinarySearch.binarySearchFromTo = function(array, value, from, to) {
+    return this.constructor.binarySearchFromTo(array, value, from, to, function(a, b) {
+      if (a > b) {
+        return 1;
+      } else if (a < b) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
+  };
+
+  return BinarySearch;
+
+})();
+
+
+},{}],12:[function(require,module,exports){
 var Constants;
 
 Constants = (function() {
@@ -725,7 +768,7 @@ Constants = (function() {
 module.exports = Constants;
 
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 
 /**
  * Fill an array with a particular value
@@ -747,8 +790,10 @@ fillArray = function(fill, length) {
 module.exports = fillArray;
 
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 exports.arithmetic = require('./arithmetic.coffee');
+
+exports.binarySearch = require('./binarysearch.coffee');
 
 exports.constants = require('./constants.coffee');
 
@@ -759,7 +804,7 @@ exports.objectiveFn = require('./objectiveFn.coffee');
 exports.randomVector = require('./randomVector.coffee');
 
 
-},{"./arithmetic.coffee":10,"./constants.coffee":11,"./fillArray.coffee":12,"./objectiveFn.coffee":14,"./randomVector.coffee":15}],14:[function(require,module,exports){
+},{"./arithmetic.coffee":10,"./binarysearch.coffee":11,"./constants.coffee":12,"./fillArray.coffee":13,"./objectiveFn.coffee":15,"./randomVector.coffee":16}],15:[function(require,module,exports){
 
 /**
  * Objective function
@@ -777,7 +822,7 @@ objectiveFn = function(vector) {
 module.exports = objectiveFn;
 
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 
 /**
  * Create a random vector
