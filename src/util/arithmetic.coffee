@@ -1,6 +1,6 @@
 
-arithmetic =
-    STIRLING_CORRECTION: [
+class Arithmetic
+    @STIRLING_CORRECTION: [
         0.0,
         8.106146679532726e-02,
         4.134069595540929e-02,
@@ -35,7 +35,7 @@ arithmetic =
     ],
 
     # Math.log(k!) for k = 0 ... 29
-    LOG_FACTORIALS: [
+    @LOG_FACTORIALS: [
         0.00000000000000000,
         0.00000000000000000,
         0.69314718055994531,
@@ -69,7 +69,7 @@ arithmetic =
     ],
 
     # k! for k = 0 ... 20
-    LONG_FACTORIALS: [
+    @FACTORIALS: [
         1,
         1,
         2,
@@ -90,11 +90,8 @@ arithmetic =
         355687428096000,
         6402373705728000,
         121645100408832000,
-        2432902008176640000
-    ],
-
-    # k! for k = 21 ... 170
-    DOUBLE_FACTORIALS: [
+        2432902008176640000,
+        # Double factorials
         5.109094217170944e19,
         1.1240007277776077e21,
         2.585201673888498e22,
@@ -246,11 +243,14 @@ arithmetic =
         4.2690680090047056e304,
         7.257415615308004e306
     ],
+
     ###*
-     * Return the binomial coefficient
-     * @type {[type]}
+     * Calculate the binomial coefficiant
+     * @param  {Number} n
+     * @param  {Number} k
+     * @return {Number}
     ###
-    binomial: (n, k) ->
+    @binomial: (n, k) ->
         if k < 0 then 0
         else if k == 0 then 1
         else if k == 1 then n
@@ -262,9 +262,23 @@ arithmetic =
             while i--
                 binomial *= (a++) / (b++)
             binomial
-    ceil: (value) ->
+
+    ###*
+     * Returns the smallest long value greater than a value
+     * @param  {Number} value
+     * @return {Number}
+    ###
+    @ceil: (value) ->
         Math.round(Math.ceil(value))
-    chbevl: (x, coef, N) ->
+
+    ###*
+     * Evaluates the series of the Chebyshhev polynomials Ti at argument x/2
+     * @param  {Number} x
+     * @param  {Number[]} coef
+     * @param  {Number} N
+     * @return {Number}      [description]
+    ###
+    @chbevl: (x, coef, N) ->
         p = 0
         b0 = coef[p++]
         b1 = 0.0
@@ -274,22 +288,56 @@ arithmetic =
             b1 = b0
             b0 = x * b1 - b2 + coef[p++]
         0.5 * (b0 - b2)
-    factorial: (k) ->
-        # TODO Throw error if k < 0
-        l1 = @LONG_FACTORIALS.length
-        l2 = @DOUBLE_FACTORIALS.length
-        if k < l1 then @LONG_FACTORIALS[k]
-        else if k < l1 + l2 then DOUBLE_FACTORIALS[k - l1]
+
+    ###*
+     * Returns a precalculated factorial
+     * @param  {Number} k
+     * @return {Number}
+    ###
+    @factorial: (k) ->
+        if k < 0 then throw new Error
+        if k < @constructor.FACTORIALS.length then @constructor.FACTORIALS[k]
         else Number.POSITIVE_INFINITY
-    floor: (value) ->
+
+    ###*
+     * Returns the largest long value less than a value
+     * @param  {Number} value
+     * @return {Number}
+    ###
+    @floor: (value) ->
         Math.round(Math.floor(value))
-    log: (base, value) ->
+
+    ###*
+     * Returns log with base and value
+     * @param  {Number} base
+     * @param  {Number} value
+     * @return {Number}
+    ###
+    @log: (base, value) ->
         Math.log(value) / Math.log(base)
-    log10: (value) ->
+
+    ###*
+     * Returns log base 10 value
+     * @param  {Number} value
+     * @return {Number}
+    ###
+    @log10: (value) ->
         Math.log(value) * 0.43429448190325176
-    log2: (value) ->
+
+    ###*
+     * Returns log base 2 value
+     * @param  {Number} value
+     * @return {Number}
+    ###
+    @log2: (value) ->
         Math.log(value) * 1.4426950408889634
-    logFactorial: (k) ->
+
+    ###*
+     * Returns log factorial of a value
+     * @param  {Number} k
+     * @return {Number}
+    ###
+    @logFactorial: (k) ->
         if k >= 30
             r = 1.0 / k
             rr = r * r
@@ -300,11 +348,14 @@ arithmetic =
             C0 = 9.18938533204672742e-01
             (k + 0.5) * Math.log(k) - k + C0 + r * (C1 + rr * (C3 + rr * (C5 + rr * C7)));
         else
-            @LOG_FACTORIALS[k]
-    longFactorial: (k) ->
-        ## TODO THROW ERROR if k < 0 then
-        if k < @LONG_FACTORIALS.length then @LONG_FACTORIALS[k]
-    stirlingCorrection: (k) ->
+            @constructor.LOG_FACTORIALS[k]
+
+    ###*
+     * Returns the StrilingCorrection
+     * @param  {Number} k
+     * @return {Number}
+    ###
+    @stirlingCorrection: (k) ->
         if k >= 30
             r = 1.0 / k;
             rr = r * r;
@@ -313,6 +364,6 @@ arithmetic =
             C3 = -2.77777777777777778e-03;     #  -1/360
             C1 = 8.33333333333333333e-02;      #  +1/12
             r * (C1 + rr * (C3 + rr * (C5 + rr * C7)));
-        else @STIRLING_CORRECTION[k]
+        else @constructor.STIRLING_CORRECTION[k]
 
-module.exports = arithmetic
+module.exports = Arithmetic
