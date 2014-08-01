@@ -1,102 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var ActivationFunction, ErrorFunction, Layer, LinearErrorFunction, Network, Neuron, Pattern, SigmoidActivationFunction,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-Pattern = (function() {
-  function Pattern(input, output) {
-    this.input = input;
-    this.output = output;
-  }
-
-  Pattern.prototype.getInput = function() {
-    return this.input;
-  };
-
-  Pattern.prototype.setInput = function(input) {
-    this.input = input;
-  };
-
-  Pattern.prototype.getOutput = function() {
-    return this.output;
-  };
-
-  Pattern.prototype.setOutput = function(output) {
-    this.output = output;
-  };
-
-  return Pattern;
-
-})();
-
-ActivationFunction = (function() {
-  function ActivationFunction(activationFunction, derivativeFunction) {
-    this.activationFunction = activationFunction;
-    this.derivativeFunction = derivativeFunction;
-  }
-
-  ActivationFunction.prototype.getActivationFunction = function() {
-    return this.activationFunction;
-  };
-
-  ActivationFunction.prototype.getDerivativeFunction = function() {
-    return this.derivativeFunction;
-  };
-
-  return ActivationFunction;
-
-})();
-
-SigmoidActivationFunction = (function(_super) {
-  var activationFunction, derivativeFunction;
-
-  __extends(SigmoidActivationFunction, _super);
-
-  activationFunction = function(activation) {
-    return 1.0 / (1.0 + Math.exp(-activation));
-  };
-
-  derivativeFunction = function(previousOutput, output) {
-    return output * (1.0 - output);
-  };
-
-  function SigmoidActivationFunction() {
-    SigmoidActivationFunction.__super__.constructor.call(this, activationFunction, derivativeFunction);
-  }
-
-  return SigmoidActivationFunction;
-
-})(ActivationFunction);
-
-ErrorFunction = (function() {
-  function ErrorFunction(errorFunction) {
-    this.errorFunction = errorFunction;
-  }
-
-  ErrorFunction.prototype.getErrorFunction = function() {
-    return this.errorFunction;
-  };
-
-  return ErrorFunction;
-
-})();
-
-LinearErrorFunction = (function(_super) {
-  var errorFunction;
-
-  __extends(LinearErrorFunction, _super);
-
-  errorFunction = function(ideal, actual) {
-    return ideal - actual;
-  };
-
-  function LinearErrorFunction() {
-    LinearErrorFunction.__super__.constructor.call(this, errorFunction);
-  }
-
-  return LinearErrorFunction;
-
-})(ErrorFunction);
+var Layer, Network, Neuron;
 
 Neuron = (function() {
   function Neuron(activation) {
@@ -375,17 +278,6 @@ Network = (function() {
     return forward(domain);
   };
 
-  Network.test = function() {
-    var newtwork, patterns;
-    patterns = [new Pattern([0, 0], [0]), new Pattern([0, 1], [1]), new Pattern([1, 0], [1]), new Pattern([1, 1], [0])];
-    newtwork = this.constuctor.create([[0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0]], new SigmoidActivationFunction(), new LinearErrorFunction());
-    network.train(patterns, 0.3, 0.8);
-    netowrk.solve(patterns[0]);
-    netowrk.solve(patterns[1]);
-    netowrk.solve(patterns[2]);
-    return netowrk.solve(patterns[3]);
-  };
-
   return Network;
 
 })();
@@ -394,17 +286,121 @@ module.exports = Network;
 
 
 },{}],2:[function(require,module,exports){
+var ErrorFunction;
+
+ErrorFunction = (function() {
+  function ErrorFunction(errorFunction) {
+    this.errorFunction = errorFunction;
+  }
+
+  ErrorFunction.prototype.getErrorFunction = function() {
+    return this.errorFunction;
+  };
+
+  return ErrorFunction;
+
+})();
+
+module.exports = ErrorFunction;
+
+
+},{}],3:[function(require,module,exports){
+exports.ErrorFunction = require('./errorFunction.coffee');
+
+exports.LinearErrorFunction = require('./linearErrorFunction.coffee');
+
+
+},{"./errorFunction.coffee":2,"./linearErrorFunction.coffee":4}],4:[function(require,module,exports){
+var ErrorFunction, LinearErrorFunction,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+ErrorFunction = require('./errorFunction.coffee');
+
+LinearErrorFunction = (function(_super) {
+  var errorFunction;
+
+  __extends(LinearErrorFunction, _super);
+
+  errorFunction = function(ideal, actual) {
+    return ideal - actual;
+  };
+
+  function LinearErrorFunction() {
+    LinearErrorFunction.__super__.constructor.call(this, errorFunction);
+  }
+
+  return LinearErrorFunction;
+
+})(ErrorFunction);
+
+module.exports = LinearErrorFunction;
+
+
+},{"./errorFunction.coffee":2}],5:[function(require,module,exports){
 (function (global){
-var ai;
+var ai, network, patterns;
 
 ai = {
   version: '0.0.1'
 };
 
-ai.network = require('./back-propagation.coffee');
+ai.activation = './activation/index.coffee';
+
+ai.error = require('./error/index.coffee');
+
+ai.Network = require('./backPropagation.coffee');
+
+ai.Pattern = require('./pattern.coffee');
+
+network = new ai.Network([[0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0]], new ai.activation.SigmoidActivationFunction(), new ai.error.LinearErrorFunction());
+
+patterns = [new ai.Pattern([0, 0], [0]), new ai.Pattern([0, 1], [1]), new ai.Pattern([1, 0], [1]), new ai.Pattern([1, 1], [0])];
+
+network.train(patterns, 0.3, 0.8);
+
+netowrk.solve(patterns[0]);
+
+netowrk.solve(patterns[1]);
+
+netowrk.solve(patterns[2]);
+
+netowrk.solve(patterns[3]);
 
 global.ai = ai;
 
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./back-propagation.coffee":1}]},{},[2])
+},{"./backPropagation.coffee":1,"./error/index.coffee":3,"./pattern.coffee":6}],6:[function(require,module,exports){
+var Pattern;
+
+Pattern = (function() {
+  function Pattern(input, output) {
+    this.input = input;
+    this.output = output;
+  }
+
+  Pattern.prototype.getInput = function() {
+    return this.input;
+  };
+
+  Pattern.prototype.setInput = function(input) {
+    this.input = input;
+  };
+
+  Pattern.prototype.getOutput = function() {
+    return this.output;
+  };
+
+  Pattern.prototype.setOutput = function(output) {
+    this.output = output;
+  };
+
+  return Pattern;
+
+})();
+
+module.exports = Pattern;
+
+
+},{}]},{},[5])
