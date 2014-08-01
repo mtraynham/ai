@@ -1,13 +1,15 @@
 # http://www.maths.usyd.edu.au/u/joachimw/Project3.pdf
+class Pattern
+    constructor: (@input, @output) ->
+    getInput: () -> @input
+    setInput: (@input) ->
+    getOutput: () -> @output
+    setOutput: (@output) ->
+
 class Neuron
-    constructor: (@lrate) ->
+    constructor: () ->
         @activationFn = (activation) -> 1.0 / (1.0 + Math.exp - activation)
         @derivativeFn = (output) -> output * (1.0 - output)
-    ###*
-     * Initialize this neuron with weights
-     * @param  {double[]} weights
-    ###
-    init: (@weights, @lastDelta, @derivative) ->
     ###*
      * Execute feed forward
      * @param  {double[]} input
@@ -25,13 +27,14 @@ class Neuron
     back: (input) ->
     ###*
      * Update the weights
+     * @param {double} learningRate
      * @param {double} momentum
     ###
-    update: (momentum) ->
+    update: (learningRate, momentum) ->
         i = @weights.length
         while i--
-            delta = @lrate * @derivative[i] + @lastDelta[i] * momentum
-            @weights[i] = @weights[i] + delta
+            delta = learningRate * @derivative[i] + @lastDelta[i] * momentum
+            @weights[i] += delta
             @lastDelta[i] = delta
             @deriv[i] = 0.0
 
@@ -47,8 +50,6 @@ class Layer
      * @param  {Layer} next
     ###
     init: (@previous, @next) ->
-        @neurons.forEach (neuron) ->
-            neuron.init new Array(@previous.getNeurons().length)
     ###*
      * Get the list of neurons contained in this layer
      * @return {Neuron[]}
@@ -91,12 +92,13 @@ class Layer
     back: (expected) ->
         output = @neurons.map (neuron) ->
             neuron.back(expected)
-        if @back? then @previous.back(output) else output
+        if @previous? then @previous.back(output) else output
     ###*
      * Update the neurons in this layer
-     * @param  {double} momentum
+     * @param {double} learningRate
+     * @param {double} momentum
     ###
-    update: (momentum) -> @neurons.forEach (neuron) -> neuron.update(momentum)
+    update: (learningRate, momentum) -> @neurons.forEach (neuron) -> neuron.update(learningRate, momentum)
 
 class Network
     constructor: (layers) ->
@@ -113,27 +115,28 @@ class Network
     ###
     @create: (layers) ->
         new Network(layers)
-    forward = (vector) -> @layers[0].forward(vector)
-    back = (expected) -> @layers[@layers.length - 1].back(expected)
-    update = () -> @layers.forEach (layer) -> layer.update(momentum)
+    forward = (input) -> @layers[0].forward(vector)
+    back = (output) -> @layers[@layers.length - 1].back(output)
+    update = (learningRate, momentum) -> @layers.forEach (layer) -> layer.update(learningRate, momentum)
     ###*
-     * Ratin the network
-     * @param  {[[]]} domain
-     * @param  {[[]]} expected
-     * @param  {double} lrate
+     * Train the network
+     * @param  {Pattern[]} patterns
+     * @param  {double} learningRate
+     * @param  {double} momentum
      * @param  {int} iterations=1000
-     * @return {network}
     ###
-    train: (domain, expected, lrate, iterations = 1000) ->
+    train: (patterns, learningRate, momentum, iterations = 1000) ->
         i = iterations
         while i--
-            domain.forEach (pattern) ->
-                expected = pattern[pattern.length - 1]
+            patterns.forEach (pattern) ->
+                forward(pattern.getInput())
+                back(pattern.getOutput())
+            update(learningRate, momentum)
     ###*
      * Solve the domain using this network
      * @param  {Network} domain
      * @return {[[]]}
     ###
-    solve: (domain) ->
+    solve: (domain) -> forward(domain)
 
 module.exports = Network

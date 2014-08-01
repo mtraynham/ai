@@ -1,9 +1,34 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Layer, Network, Neuron;
+var Layer, Network, Neuron, Pattern;
+
+Pattern = (function() {
+  function Pattern(input, output) {
+    this.input = input;
+    this.output = output;
+  }
+
+  Pattern.prototype.getInput = function() {
+    return this.input;
+  };
+
+  Pattern.prototype.setInput = function(input) {
+    this.input = input;
+  };
+
+  Pattern.prototype.getOutput = function() {
+    return this.output;
+  };
+
+  Pattern.prototype.setOutput = function(output) {
+    this.output = output;
+  };
+
+  return Pattern;
+
+})();
 
 Neuron = (function() {
-  function Neuron(lrate) {
-    this.lrate = lrate;
+  function Neuron() {
     this.activationFn = function(activation) {
       return 1.0 / (1.0 + Math.exp - activation);
     };
@@ -11,18 +36,6 @@ Neuron = (function() {
       return output * (1.0 - output);
     };
   }
-
-
-  /**
-   * Initialize this neuron with weights
-   * @param  {double[]} weights
-   */
-
-  Neuron.prototype.init = function(weights, lastDelta, derivative) {
-    this.weights = weights;
-    this.lastDelta = lastDelta;
-    this.derivative = derivative;
-  };
 
 
   /**
@@ -49,16 +62,17 @@ Neuron = (function() {
 
   /**
    * Update the weights
+   * @param {double} learningRate
    * @param {double} momentum
    */
 
-  Neuron.prototype.update = function(momentum) {
+  Neuron.prototype.update = function(learningRate, momentum) {
     var delta, i, _results;
     i = this.weights.length;
     _results = [];
     while (i--) {
-      delta = this.lrate * this.derivative[i] + this.lastDelta[i] * momentum;
-      this.weights[i] = this.weights[i] + delta;
+      delta = learningRate * this.derivative[i] + this.lastDelta[i] * momentum;
+      this.weights[i] += delta;
       this.lastDelta[i] = delta;
       _results.push(this.deriv[i] = 0.0);
     }
@@ -89,9 +103,6 @@ Layer = (function() {
   Layer.prototype.init = function(previous, next) {
     this.previous = previous;
     this.next = next;
-    return this.neurons.forEach(function(neuron) {
-      return neuron.init(new Array(this.previous.getNeurons().length));
-    });
   };
 
 
@@ -175,7 +186,7 @@ Layer = (function() {
     output = this.neurons.map(function(neuron) {
       return neuron.back(expected);
     });
-    if (this.back != null) {
+    if (this.previous != null) {
       return this.previous.back(output);
     } else {
       return output;
@@ -185,12 +196,13 @@ Layer = (function() {
 
   /**
    * Update the neurons in this layer
-   * @param  {double} momentum
+   * @param {double} learningRate
+   * @param {double} momentum
    */
 
-  Layer.prototype.update = function(momentum) {
+  Layer.prototype.update = function(learningRate, momentum) {
     return this.neurons.forEach(function(neuron) {
-      return neuron.update(momentum);
+      return neuron.update(learningRate, momentum);
     });
   };
 
@@ -236,31 +248,30 @@ Network = (function() {
     return new Network(layers);
   };
 
-  forward = function(vector) {
+  forward = function(input) {
     return this.layers[0].forward(vector);
   };
 
-  back = function(expected) {
-    return this.layers[this.layers.length - 1].back(expected);
+  back = function(output) {
+    return this.layers[this.layers.length - 1].back(output);
   };
 
-  update = function() {
+  update = function(learningRate, momentum) {
     return this.layers.forEach(function(layer) {
-      return layer.update(momentum);
+      return layer.update(learningRate, momentum);
     });
   };
 
 
   /**
-   * Ratin the network
-   * @param  {[[]]} domain
-   * @param  {[[]]} expected
-   * @param  {double} lrate
+   * Train the network
+   * @param  {Pattern[]} patterns
+   * @param  {double} learningRate
+   * @param  {double} momentum
    * @param  {int} iterations=1000
-   * @return {network}
    */
 
-  Network.prototype.train = function(domain, expected, lrate, iterations) {
+  Network.prototype.train = function(patterns, learningRate, momentum, iterations) {
     var i, _results;
     if (iterations == null) {
       iterations = 1000;
@@ -268,9 +279,11 @@ Network = (function() {
     i = iterations;
     _results = [];
     while (i--) {
-      _results.push(domain.forEach(function(pattern) {
-        return expected = pattern[pattern.length - 1];
-      }));
+      patterns.forEach(function(pattern) {
+        forward(pattern.getInput());
+        return back(pattern.getOutput());
+      });
+      _results.push(update(learningRate, momentum));
     }
     return _results;
   };
@@ -282,7 +295,9 @@ Network = (function() {
    * @return {[[]]}
    */
 
-  Network.prototype.solve = function(domain) {};
+  Network.prototype.solve = function(domain) {
+    return forward(domain);
+  };
 
   return Network;
 
