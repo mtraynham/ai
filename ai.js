@@ -1,5 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Layer, Network, Neuron, Pattern;
+var ActivationFunction, ErrorFunction, Layer, LinearErrorFunction, Network, Neuron, Pattern, SigmoidActivationFunction,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Pattern = (function() {
   function Pattern(input, output) {
@@ -27,14 +29,78 @@ Pattern = (function() {
 
 })();
 
+ActivationFunction = (function() {
+  function ActivationFunction(activationFunction, derivativeFunction) {
+    this.activationFunction = activationFunction;
+    this.derivativeFunction = derivativeFunction;
+  }
+
+  ActivationFunction.prototype.getActivationFunction = function() {
+    return this.activationFunction;
+  };
+
+  ActivationFunction.prototype.getDerivativeFunction = function() {
+    return this.derivativeFunction;
+  };
+
+  return ActivationFunction;
+
+})();
+
+SigmoidActivationFunction = (function(_super) {
+  var activationFunction, derivativeFunction;
+
+  __extends(SigmoidActivationFunction, _super);
+
+  activationFunction = function(activation) {
+    return 1.0 / (1.0 + Math.exp(-activation));
+  };
+
+  derivativeFunction = function(previousOutput, output) {
+    return output * (1.0 - output);
+  };
+
+  function SigmoidActivationFunction() {
+    SigmoidActivationFunction.__super__.constructor.call(this, activationFunction, derivativeFunction);
+  }
+
+  return SigmoidActivationFunction;
+
+})(ActivationFunction);
+
+ErrorFunction = (function() {
+  function ErrorFunction(errorFunction) {
+    this.errorFunction = errorFunction;
+  }
+
+  ErrorFunction.prototype.getErrorFunction = function() {
+    return this.errorFunction;
+  };
+
+  return ErrorFunction;
+
+})();
+
+LinearErrorFunction = (function(_super) {
+  var errorFunction;
+
+  __extends(LinearErrorFunction, _super);
+
+  errorFunction = function(ideal, actual) {
+    return ideal - actual;
+  };
+
+  function LinearErrorFunction() {
+    LinearErrorFunction.__super__.constructor.call(this, errorFunction);
+  }
+
+  return LinearErrorFunction;
+
+})(ErrorFunction);
+
 Neuron = (function() {
-  function Neuron() {
-    this.activationFn = function(activation) {
-      return 1.0 / (1.0 + Math.exp(-activation));
-    };
-    this.derivativeFn = function(output) {
-      return output * (1.0 - output);
-    };
+  function Neuron(activation) {
+    this.activation = activation;
   }
 
 
@@ -45,7 +111,7 @@ Neuron = (function() {
    */
 
   Neuron.prototype.forward = function(input) {
-    return this.lastOutput = this.activationFn(input.reduce(function(previous, current, index) {
+    return this.lastOutput = this.activation.getActivationFunction()(input.reduce(function(previous, current, index) {
       return previous += this.weights[index] * current;
     }, 0.0));
   };
@@ -213,7 +279,7 @@ Layer = (function() {
 Network = (function() {
   var back, forward, update;
 
-  function Network(layers) {
+  function Network(layers, activationFunction, errorFunction) {
     var layer, neuron;
     this.layers = (function() {
       var _i, _len, _results;
@@ -223,9 +289,9 @@ Network = (function() {
         _results.push(new Layer((function() {
           var _j, _len1, _results1;
           _results1 = [];
-          for (_j = 0, _len1 = neurons.length; _j < _len1; _j++) {
-            neuron = neurons[_j];
-            _results1.push(new Neuron(neuron));
+          for (_j = 0, _len1 = layer.length; _j < _len1; _j++) {
+            neuron = layer[_j];
+            _results1.push(new Neuron(activationFunction, errorFunction));
           }
           return _results1;
         })()));
@@ -239,22 +305,32 @@ Network = (function() {
 
 
   /**
-   * Create a network
-   * @param  {Layer[]} layers
-   * @return {Network}
+   * Execute feed forward propagation on this network
+   * @param  {[]} input [description]
+   * @return {[]}
    */
 
-  Network.create = function(layers) {
-    return new Network(layers);
+  forward = function(input) {
+    return this.layers[0].forward(input);
   };
 
-  forward = function(input) {
-    return this.layers[0].forward(vector);
-  };
+
+  /**
+   * Execute fedd back propagation on this network
+   * @param  {[]} output
+   * @return {[]}
+   */
 
   back = function(output) {
     return this.layers[this.layers.length - 1].back(output);
   };
+
+
+  /**
+   * Update the network
+   * @param  {double} learningRate
+   * @param  {double} momentum
+   */
 
   update = function(learningRate, momentum) {
     return this.layers.forEach(function(layer) {
@@ -291,12 +367,23 @@ Network = (function() {
 
   /**
    * Solve the domain using this network
-   * @param  {Network} domain
-   * @return {[[]]}
+   * @param  {[]} domain
+   * @return {[]}
    */
 
   Network.prototype.solve = function(domain) {
     return forward(domain);
+  };
+
+  Network.test = function() {
+    var newtwork, patterns;
+    patterns = [new Pattern([0, 0], [0]), new Pattern([0, 1], [1]), new Pattern([1, 0], [1]), new Pattern([1, 1], [0])];
+    newtwork = this.constuctor.create([[0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0]], new SigmoidActivationFunction(), new LinearErrorFunction());
+    network.train(patterns, 0.3, 0.8);
+    netowrk.solve(patterns[0]);
+    netowrk.solve(patterns[1]);
+    netowrk.solve(patterns[2]);
+    return netowrk.solve(patterns[3]);
   };
 
   return Network;

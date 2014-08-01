@@ -6,17 +6,34 @@ class Pattern
     getOutput: () -> @output
     setOutput: (@output) ->
 
-class Neuron
+class ActivationFunction
+    constructor: (@activationFunction, @derivativeFunction) ->
+    getActivationFunction: () -> @activationFunction
+    getDerivativeFunction: () -> @derivativeFunction
+
+class SigmoidActivationFunction extends ActivationFunction
+    activationFunction = (activation) -> 1.0 / (1.0 + Math.exp -activation)
+    derivativeFunction = (previousOutput, output) -> output * (1.0 - output)
+    constructor: () -> super activationFunction, derivativeFunction
+
+class ErrorFunction
+    constructor: (@errorFunction) ->
+    getErrorFunction: () -> @errorFunction
+
+class LinearErrorFunction extends ErrorFunction
+    errorFunction = (ideal, actual) -> ideal - actual
     constructor: () ->
-        @activationFn = (activation) -> 1.0 / (1.0 + Math.exp -activation)
-        @derivativeFn = (output) -> output * (1.0 - output)
+        super(errorFunction)
+
+class Neuron
+    constructor: (@activation) ->
     ###*
      * Execute feed forward
      * @param  {double[]} input
      * @return {double}
     ###
     forward: (input) ->
-        @lastOutput = @activationFn input.reduce (previous, current, index) ->
+        @lastOutput = @activation.getActivationFunction() input.reduce (previous, current, index) ->
             previous += @weights[index] * current
         , 0.0
     ###*
@@ -101,22 +118,30 @@ class Layer
     update: (learningRate, momentum) -> @neurons.forEach (neuron) -> neuron.update(learningRate, momentum)
 
 class Network
-    constructor: (layers) ->
-        @layers = (new Layer(new Neuron(neuron) for neuron in neurons) for layer in layers)
+    constructor: (layers, activationFunction, errorFunction) ->
+        @layers = (new Layer(new Neuron(activationFunction, errorFunction) for neuron in layer) for layer in layers)
         @layers.forEach (layer, index, layers) ->
             layer.init (
                 if index == 0 then null else layers[index - 1]
                 if index == layers.length - 1 then null else layers[index + 1]
                 )
     ###*
-     * Create a network
-     * @param  {Layer[]} layers
-     * @return {Network}
+     * Execute feed forward propagation on this network
+     * @param  {[]} input [description]
+     * @return {[]}
     ###
-    @create: (layers) ->
-        new Network(layers)
-    forward = (input) -> @layers[0].forward(vector)
+    forward = (input) -> @layers[0].forward(input)
+    ###*
+     * Execute fedd back propagation on this network
+     * @param  {[]} output
+     * @return {[]}
+    ###
     back = (output) -> @layers[@layers.length - 1].back(output)
+    ###*
+     * Update the network
+     * @param  {double} learningRate
+     * @param  {double} momentum
+    ###
     update = (learningRate, momentum) -> @layers.forEach (layer) -> layer.update(learningRate, momentum)
     ###*
      * Train the network
@@ -134,9 +159,25 @@ class Network
             update(learningRate, momentum)
     ###*
      * Solve the domain using this network
-     * @param  {Network} domain
-     * @return {[[]]}
+     * @param  {[]} domain
+     * @return {[]}
     ###
     solve: (domain) -> forward(domain)
+
+    @test: () ->
+        patterns = [
+            new Pattern([0, 0], [0])
+            new Pattern([0, 1], [1])
+            new Pattern([1, 0], [1])
+            new Pattern([1, 1], [0])
+        ]
+        newtwork = @constuctor.create [[0, 0], [0, 0, 0, 0], [0, 0, 0, 0],[0]]
+            , new SigmoidActivationFunction()
+            , new LinearErrorFunction()
+        network.train(patterns, 0.3, 0.8)
+        netowrk.solve(patterns[0])
+        netowrk.solve(patterns[1])
+        netowrk.solve(patterns[2])
+        netowrk.solve(patterns[3])
 
 module.exports = Network
