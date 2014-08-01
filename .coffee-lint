@@ -55,7 +55,7 @@
     },
     "no_plusplus": {
         "name": "no_plusplus",
-        "level": "warn"
+        "level": "ignore"
     },
     "no_throwing_strings": {
         "name": "no_throwing_strings",
