@@ -30,7 +30,7 @@ Pattern = (function() {
 Neuron = (function() {
   function Neuron() {
     this.activationFn = function(activation) {
-      return 1.0 / (1.0 + Math.exp - activation);
+      return 1.0 / (1.0 + Math.exp(-activation));
     };
     this.derivativeFn = function(output) {
       return output * (1.0 - output);

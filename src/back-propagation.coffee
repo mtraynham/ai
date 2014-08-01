@@ -8,7 +8,7 @@ class Pattern
 
 class Neuron
     constructor: () ->
-        @activationFn = (activation) -> 1.0 / (1.0 + Math.exp - activation)
+        @activationFn = (activation) -> 1.0 / (1.0 + Math.exp -activation)
         @derivativeFn = (output) -> output * (1.0 - output)
     ###*
      * Execute feed forward
