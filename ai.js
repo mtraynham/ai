@@ -1,4 +1,65 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var ActivationFunction;
+
+ActivationFunction = (function() {
+  function ActivationFunction(activationFunction, derivativeFunction) {
+    this.activationFunction = activationFunction;
+    this.derivativeFunction = derivativeFunction;
+  }
+
+  ActivationFunction.prototype.getActivationFunction = function() {
+    return this.activationFunction;
+  };
+
+  ActivationFunction.prototype.getDerivativeFunction = function() {
+    return this.derivativeFunction;
+  };
+
+  return ActivationFunction;
+
+})();
+
+module.exports = ActivationFunction;
+
+
+},{}],2:[function(require,module,exports){
+exports.ActivationFunction = require('./activationFunction.coffee');
+
+exports.SigmoidActivationFunction = require('./sigmoidActivationFunction.coffee');
+
+
+},{"./activationFunction.coffee":1,"./sigmoidActivationFunction.coffee":3}],3:[function(require,module,exports){
+var ActivationFunction, SigmoidActivationFunction,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+ActivationFunction = require('./activationFunction');
+
+SigmoidActivationFunction = (function(_super) {
+  var activationFunction, derivativeFunction;
+
+  __extends(SigmoidActivationFunction, _super);
+
+  activationFunction = function(activation) {
+    return 1.0 / (1.0 + Math.exp(-activation));
+  };
+
+  derivativeFunction = function(previousOutput, output) {
+    return output * (1.0 - output);
+  };
+
+  function SigmoidActivationFunction() {
+    SigmoidActivationFunction.__super__.constructor.call(this, activationFunction, derivativeFunction);
+  }
+
+  return SigmoidActivationFunction;
+
+})(ActivationFunction);
+
+module.exports = SigmoidActivationFunction;
+
+
+},{"./activationFunction":1}],4:[function(require,module,exports){
 var Layer, Network, Neuron;
 
 Neuron = (function() {
@@ -285,7 +346,7 @@ Network = (function() {
 module.exports = Network;
 
 
-},{}],2:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var ErrorFunction;
 
 ErrorFunction = (function() {
@@ -304,13 +365,13 @@ ErrorFunction = (function() {
 module.exports = ErrorFunction;
 
 
-},{}],3:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 exports.ErrorFunction = require('./errorFunction.coffee');
 
 exports.LinearErrorFunction = require('./linearErrorFunction.coffee');
 
 
-},{"./errorFunction.coffee":2,"./linearErrorFunction.coffee":4}],4:[function(require,module,exports){
+},{"./errorFunction.coffee":5,"./linearErrorFunction.coffee":7}],7:[function(require,module,exports){
 var ErrorFunction, LinearErrorFunction,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -337,25 +398,25 @@ LinearErrorFunction = (function(_super) {
 module.exports = LinearErrorFunction;
 
 
-},{"./errorFunction.coffee":2}],5:[function(require,module,exports){
+},{"./errorFunction.coffee":5}],8:[function(require,module,exports){
 (function (global){
-var ai, network, patterns;
+var Ai, network, patterns;
 
-ai = {
+Ai = {
   version: '0.0.1'
 };
 
-ai.activation = './activation/index.coffee';
+Ai.Activation = require('./activation/index.coffee');
 
-ai.error = require('./error/index.coffee');
+Ai.Error = require('./error/index.coffee');
 
-ai.Network = require('./backPropagation.coffee');
+Ai.Network = require('./backPropagation.coffee');
 
-ai.Pattern = require('./pattern.coffee');
+Ai.Pattern = require('./pattern.coffee');
 
-network = new ai.Network([[0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0]], new ai.activation.SigmoidActivationFunction(), new ai.error.LinearErrorFunction());
+network = new Ai.Network([[0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0]], new Ai.Activation.SigmoidActivationFunction(), new Ai.Error.LinearErrorFunction());
 
-patterns = [new ai.Pattern([0, 0], [0]), new ai.Pattern([0, 1], [1]), new ai.Pattern([1, 0], [1]), new ai.Pattern([1, 1], [0])];
+patterns = [new Ai.Pattern([0, 0], [0]), new Ai.Pattern([0, 1], [1]), new Ai.Pattern([1, 0], [1]), new Ai.Pattern([1, 1], [0])];
 
 network.train(patterns, 0.3, 0.8);
 
@@ -371,7 +432,7 @@ global.ai = ai;
 
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./backPropagation.coffee":1,"./error/index.coffee":3,"./pattern.coffee":6}],6:[function(require,module,exports){
+},{"./activation/index.coffee":2,"./backPropagation.coffee":4,"./error/index.coffee":6,"./pattern.coffee":9}],9:[function(require,module,exports){
 var Pattern;
 
 Pattern = (function() {
@@ -403,4 +464,4 @@ Pattern = (function() {
 module.exports = Pattern;
 
 
-},{}]},{},[5])
+},{}]},{},[8])
