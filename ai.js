@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"./src/index.coffee":[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 var Ai, network, patterns;
 
@@ -33,7 +33,7 @@ global.ai = ai;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./activation/index.coffee":"/Users/mrt6467/Documents/Projects/ai/src/activation/index.coffee","./backPropagation.coffee":"/Users/mrt6467/Documents/Projects/ai/src/backPropagation.coffee","./error/index.coffee":"/Users/mrt6467/Documents/Projects/ai/src/error/index.coffee","./pattern.coffee":"/Users/mrt6467/Documents/Projects/ai/src/pattern.coffee"}],"/Users/mrt6467/Documents/Projects/ai/src/activation/activationFunction.coffee":[function(require,module,exports){
+},{"./activation/index.coffee":3,"./backPropagation.coffee":5,"./error/index.coffee":7,"./pattern.coffee":9}],2:[function(require,module,exports){
 var ActivationFunction;
 
 ActivationFunction = (function() {
@@ -58,14 +58,14 @@ module.exports = ActivationFunction;
 
 
 
-},{}],"/Users/mrt6467/Documents/Projects/ai/src/activation/index.coffee":[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 exports.ActivationFunction = require('./activationFunction.coffee');
 
 exports.SigmoidActivationFunction = require('./sigmoidActivationFunction.coffee');
 
 
 
-},{"./activationFunction.coffee":"/Users/mrt6467/Documents/Projects/ai/src/activation/activationFunction.coffee","./sigmoidActivationFunction.coffee":"/Users/mrt6467/Documents/Projects/ai/src/activation/sigmoidActivationFunction.coffee"}],"/Users/mrt6467/Documents/Projects/ai/src/activation/sigmoidActivationFunction.coffee":[function(require,module,exports){
+},{"./activationFunction.coffee":2,"./sigmoidActivationFunction.coffee":4}],4:[function(require,module,exports){
 var ActivationFunction, SigmoidActivationFunction,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -97,7 +97,7 @@ module.exports = SigmoidActivationFunction;
 
 
 
-},{"./activationFunction":"/Users/mrt6467/Documents/Projects/ai/src/activation/activationFunction.coffee"}],"/Users/mrt6467/Documents/Projects/ai/src/backPropagation.coffee":[function(require,module,exports){
+},{"./activationFunction":2}],5:[function(require,module,exports){
 var Layer, Network, Neuron;
 
 Neuron = (function() {
@@ -113,8 +113,10 @@ Neuron = (function() {
    */
 
   Neuron.prototype.forward = function(input) {
+    var self;
+    self = this;
     return this.lastOutput = this.activation.getActivationFunction()(input.reduce(function(previous, current, index) {
-      return previous += this.weights[index] * current;
+      return previous += self.weights[index] * current;
     }, 0.0));
   };
 
@@ -279,8 +281,6 @@ Layer = (function() {
 })();
 
 Network = (function() {
-  var back, forward, update;
-
   function Network(layers, activationFunction, errorFunction) {
     var layer, neuron;
     this.layers = (function() {
@@ -312,7 +312,7 @@ Network = (function() {
    * @return {[]}
    */
 
-  forward = function(input) {
+  Network.prototype.forward = function(input) {
     return this.layers[0].forward(input);
   };
 
@@ -323,7 +323,7 @@ Network = (function() {
    * @return {[]}
    */
 
-  back = function(output) {
+  Network.prototype.back = function(output) {
     return this.layers[this.layers.length - 1].back(output);
   };
 
@@ -334,7 +334,7 @@ Network = (function() {
    * @param  {double} momentum
    */
 
-  update = function(learningRate, momentum) {
+  Network.prototype.update = function(learningRate, momentum) {
     return this.layers.forEach(function(layer) {
       return layer.update(learningRate, momentum);
     });
@@ -350,18 +350,19 @@ Network = (function() {
    */
 
   Network.prototype.train = function(patterns, learningRate, momentum, iterations) {
-    var i, _results;
+    var i, self, _results;
     if (iterations == null) {
       iterations = 1000;
     }
     i = iterations;
+    self = this;
     _results = [];
     while (i--) {
       patterns.forEach(function(pattern) {
-        forward(pattern.getInput());
-        return back(pattern.getOutput());
+        self.forward(pattern.getInput());
+        return self.back(pattern.getOutput());
       });
-      _results.push(update(learningRate, momentum));
+      _results.push(this.update(learningRate, momentum));
     }
     return _results;
   };
@@ -374,7 +375,7 @@ Network = (function() {
    */
 
   Network.prototype.solve = function(domain) {
-    return forward(domain);
+    return this.forward(domain);
   };
 
   return Network;
@@ -385,7 +386,7 @@ module.exports = Network;
 
 
 
-},{}],"/Users/mrt6467/Documents/Projects/ai/src/error/errorFunction.coffee":[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var ErrorFunction;
 
 ErrorFunction = (function() {
@@ -405,14 +406,14 @@ module.exports = ErrorFunction;
 
 
 
-},{}],"/Users/mrt6467/Documents/Projects/ai/src/error/index.coffee":[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 exports.ErrorFunction = require('./errorFunction.coffee');
 
 exports.LinearErrorFunction = require('./linearErrorFunction.coffee');
 
 
 
-},{"./errorFunction.coffee":"/Users/mrt6467/Documents/Projects/ai/src/error/errorFunction.coffee","./linearErrorFunction.coffee":"/Users/mrt6467/Documents/Projects/ai/src/error/linearErrorFunction.coffee"}],"/Users/mrt6467/Documents/Projects/ai/src/error/linearErrorFunction.coffee":[function(require,module,exports){
+},{"./errorFunction.coffee":6,"./linearErrorFunction.coffee":8}],8:[function(require,module,exports){
 var ErrorFunction, LinearErrorFunction,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -440,7 +441,7 @@ module.exports = LinearErrorFunction;
 
 
 
-},{"./errorFunction.coffee":"/Users/mrt6467/Documents/Projects/ai/src/error/errorFunction.coffee"}],"/Users/mrt6467/Documents/Projects/ai/src/pattern.coffee":[function(require,module,exports){
+},{"./errorFunction.coffee":6}],9:[function(require,module,exports){
 var Pattern;
 
 Pattern = (function() {
@@ -473,4 +474,4 @@ module.exports = Pattern;
 
 
 
-},{}]},{},["./src/index.coffee"]);
+},{}]},{},[1]);

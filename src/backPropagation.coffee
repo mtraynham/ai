@@ -7,8 +7,9 @@ class Neuron
      * @return {double}
     ###
     forward: (input) ->
+        self = this
         @lastOutput = @activation.getActivationFunction() input.reduce (previous, current, index) ->
-            previous += @weights[index] * current
+            previous += self.weights[index] * current
         , 0.0
     ###*
      * Execute feed forward
@@ -104,19 +105,19 @@ class Network
      * @param  {[]} input [description]
      * @return {[]}
     ###
-    forward = (input) -> @layers[0].forward(input)
+    forward: (input) -> @layers[0].forward(input)
     ###*
      * Execute fedd back propagation on this network
      * @param  {[]} output
      * @return {[]}
     ###
-    back = (output) -> @layers[@layers.length - 1].back(output)
+    back: (output) -> @layers[@layers.length - 1].back(output)
     ###*
      * Update the network
      * @param  {double} learningRate
      * @param  {double} momentum
     ###
-    update = (learningRate, momentum) -> @layers.forEach (layer) -> layer.update(learningRate, momentum)
+    update: (learningRate, momentum) -> @layers.forEach (layer) -> layer.update(learningRate, momentum)
     ###*
      * Train the network
      * @param  {Pattern[]} patterns
@@ -126,16 +127,17 @@ class Network
     ###
     train: (patterns, learningRate, momentum, iterations = 1000) ->
         i = iterations
+        self = this
         while i--
             patterns.forEach (pattern) ->
-                forward(pattern.getInput())
-                back(pattern.getOutput())
-            update(learningRate, momentum)
+                self.forward pattern.getInput()
+                self.back pattern.getOutput()
+            @update learningRate, momentum
     ###*
      * Solve the domain using this network
      * @param  {[]} domain
      * @return {[]}
     ###
-    solve: (domain) -> forward(domain)
+    solve: (domain) -> @forward(domain)
 
 module.exports = Network

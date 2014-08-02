@@ -21,9 +21,10 @@ gulp.task('build', function () {
         basedir: __dirname,
         entries: ['./src/index.coffee'],
         extensions: ['.coffee'],
+        debug: global.isProduction ? true : false,
         cache: {},
         packageCache: {},
-        fullPaths: true
+        fullPaths: false
     }).transform(coffeeify);
 
     var bundle = function () {
@@ -46,6 +47,11 @@ gulp.task('setWatch', function () {
     global.isWatching = true;
 });
 
+gulp.task('setProduction', function () {
+    global.isProduction = true;
+});
+
 // Default Task
 gulp.task('default', ['lint', 'build']);
 gulp.task('watch', ['setWatch', 'lint', 'build']);
+gulp.task('release', ['setProduction', 'lint', 'build'])
