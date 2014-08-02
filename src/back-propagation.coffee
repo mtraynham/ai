@@ -42,6 +42,7 @@ class Neuron
      * @return {double}
     ###
     back: (input) ->
+        input
     ###*
      * Update the weights
      * @param {double} learningRate

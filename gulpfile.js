@@ -6,7 +6,8 @@ var gulp = require('gulp'),
     rename = require('gulp-rename'),
     source = require('vinyl-source-stream'),
     streamify = require('gulp-streamify'),
-    uglify = require('gulp-uglify');
+    uglify = require('gulp-uglify'),
+    watchify = require('watchify');
 
 gulp.task('lint', function () {
     return gulp.src('src/*.coffee')
@@ -17,19 +18,34 @@ gulp.task('lint', function () {
 
 gulp.task('build', function () {
     var bundler = browserify({
+        basedir: __dirname,
         entries: ['./src/index.coffee'],
-        extensions: ['.coffee']
-    })
-    return bundler
-        .transform(coffeeify)
-        .bundle()
-        // .bundle({debug: true})
-        .pipe(source('ai.js'))
-        .pipe(gulp.dest('./'))
-        .pipe(streamify(uglify()))
-        .pipe(rename('ai.min.js'))
-        .pipe(gulp.dest('./'));
+        extensions: ['.coffee'],
+        cache: {},
+        packageCache: {},
+        fullPaths: true
+    }).transform(coffeeify);
+
+    var bundle = function () {
+        return bundler
+            .bundle()
+            .pipe(source('ai.js'))
+            .pipe(gulp.dest('./'))
+            .pipe(streamify(uglify()))
+            .pipe(rename('ai.min.js'))
+            .pipe(gulp.dest('./'));
+    };
+    if (global.isWatching) {
+        bundler = watchify(bundler);
+        bundler.on('update', bundle);
+    }
+    return bundle();
+});
+
+gulp.task('setWatch', function () {
+    global.isWatching = true;
 });
 
 // Default Task
 gulp.task('default', ['lint', 'build']);
+gulp.task('watch', ['setWatch', 'lint', 'build']);

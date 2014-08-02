@@ -16,15 +16,16 @@
     },
     "main": "ai.js",
     "dependencies": {
-        "browserify": "~4.2.0",
-        "coffeeify": "~0.6.0",
+        "browserify": "~5.9.1",
+        "coffeeify": "~0.7.0",
         "gulp": "~3.8.6",
         "gulp-bump": "~0.1.10",
         "gulp-coffeelint": "~0.3.3",
         "gulp-rename": "~1.2.0",
         "gulp-uglify": "~0.3.1",
         "gulp-streamify": "0.0.5",
-        "vinyl-source-stream": "~0.1.1"
+        "vinyl-source-stream": "~0.1.1",
+        "watchify": "~1.0.1"
     },
     "licenses": [
         {
