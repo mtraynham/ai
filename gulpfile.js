@@ -53,5 +53,5 @@ gulp.task('setProduction', function () {
 
 // Default Task
 gulp.task('default', ['lint', 'build']);
-gulp.task('watch', ['setWatch', 'lint', 'build']);
+gulp.task('watch', ['setProduction', 'setWatch', 'lint', 'build']);
 gulp.task('release', ['setProduction', 'lint', 'build'])

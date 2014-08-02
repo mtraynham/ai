@@ -1,6 +1,11 @@
 # http://www.maths.usyd.edu.au/u/joachimw/Project3.pdf
 class Neuron
-    constructor: (@activation) ->
+    constructor: (@activationFunction, @errorFunction) ->
+    ###*
+     * Initialize the node with weights
+     * @param  {double[]} @weights
+    ###
+    init: (@weights) ->
     ###*
      * Execute feed forward
      * @param  {double[]} input
@@ -8,7 +13,7 @@ class Neuron
     ###
     forward: (input) ->
         self = this
-        @lastOutput = @activation.getActivationFunction() input.reduce (previous, current, index) ->
+        @lastOutput = @activationFunction.getActivationFunction() input.reduce (previous, current, index) ->
             previous += self.weights[index] * current
         , 0.0
     ###*
@@ -100,6 +105,10 @@ class Network
                 if index == 0 then null else layers[index - 1]
                 if index == layers.length - 1 then null else layers[index + 1]
                 )
+            # INIT WEIGHTS OF NEURONS PER LAYER, FIRST LAYER IS DOMAIN SIZE (init during train?)
+            # OTHER LAYERS ARE PREV NEURON SIZE
+            layer.getNeurons().forEach (neuron) ->
+                neuron.init(new Array(layer.previous().getNeurons().length))
     ###*
      * Execute feed forward propagation on this network
      * @param  {[]} input [description]

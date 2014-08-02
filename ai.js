@@ -101,9 +101,20 @@ module.exports = SigmoidActivationFunction;
 var Layer, Network, Neuron;
 
 Neuron = (function() {
-  function Neuron(activation) {
-    this.activation = activation;
+  function Neuron(activationFunction, errorFunction) {
+    this.activationFunction = activationFunction;
+    this.errorFunction = errorFunction;
   }
+
+
+  /**
+   * Initialize the node with weights
+   * @param  {double[]} @weights
+   */
+
+  Neuron.prototype.init = function(weights) {
+    this.weights = weights;
+  };
 
 
   /**
@@ -115,7 +126,7 @@ Neuron = (function() {
   Neuron.prototype.forward = function(input) {
     var self;
     self = this;
-    return this.lastOutput = this.activation.getActivationFunction()(input.reduce(function(previous, current, index) {
+    return this.lastOutput = this.activationFunction.getActivationFunction()(input.reduce(function(previous, current, index) {
       return previous += self.weights[index] * current;
     }, 0.0));
   };
@@ -301,7 +312,10 @@ Network = (function() {
       return _results;
     })();
     this.layers.forEach(function(layer, index, layers) {
-      return layer.init((index === 0 ? null : layers[index - 1], index === layers.length - 1 ? null : layers[index + 1]));
+      layer.init((index === 0 ? null : layers[index - 1], index === layers.length - 1 ? null : layers[index + 1]));
+      return layer.getNeurons().forEach(function(neuron) {
+        return neuron.init(new Array(layer.previous().getNeurons().length));
+      });
     });
   }
 
