@@ -30,10 +30,10 @@ gulp.task('build', function () {
     var bundle = function () {
         return bundler
             .bundle()
-            .pipe(source('ai.js'))
+            .pipe(source('ml.js'))
             .pipe(gulp.dest('./'))
             .pipe(streamify(uglify()))
-            .pipe(rename('ai.min.js'))
+            .pipe(rename('ml.min.js'))
             .pipe(gulp.dest('./'));
     };
     if (global.isWatching) {

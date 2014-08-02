@@ -1,10 +1,8 @@
 {
-    "name": "ai",
+    "name": "ml",
     "version": "0.0.1",
-    "description": "Anything and everything artificial intelligence.",
+    "description": "Anything and everything machine learning.",
     "keywords": [
-        "ai",
-        "artificial intelligence",
         "machine learning"
     ],
     "author": {
@@ -12,9 +10,9 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/mtraynham/ai.git"
+        "url": "https://github.com/mtraynham/ml.git"
     },
-    "main": "ai.js",
+    "main": "ml.js",
     "dependencies": {
         "browserify": "~5.9.1",
         "coffeeify": "~0.7.0",
@@ -30,7 +28,7 @@
     "licenses": [
         {
             "type": "Apache v2",
-            "url": "https://github.com/mtraynham/ai/blob/master/LICENSE"
+            "url": "https://github.com/mtraynham/ml/blob/master/LICENSE"
         }
     ]
 }

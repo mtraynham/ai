@@ -1,22 +1,22 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
-var Ai, network, patterns;
+var Ml, network, patterns;
 
-Ai = {
+Ml = {
   version: '0.0.1'
 };
 
-Ai.Activation = require('./activation/index.coffee');
+Ml.Activation = require('./activation/index.coffee');
 
-Ai.Error = require('./error/index.coffee');
+Ml.Error = require('./error/index.coffee');
 
-Ai.Network = require('./backPropagation.coffee');
+Ml.Network = require('./backPropagation.coffee');
 
-Ai.Pattern = require('./pattern.coffee');
+Ml.Pattern = require('./pattern.coffee');
 
-network = new Ai.Network([[0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0]], new Ai.Activation.SigmoidActivationFunction(), new Ai.Error.LinearErrorFunction());
+network = new Ml.Network([[0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0]], new Ml.Activation.SigmoidActivationFunction(), new Ml.Error.LinearErrorFunction());
 
-patterns = [new Ai.Pattern([0, 0], [0]), new Ai.Pattern([0, 1], [1]), new Ai.Pattern([1, 0], [1]), new Ai.Pattern([1, 1], [0])];
+patterns = [new Ml.Pattern([0, 0], [0]), new Ml.Pattern([0, 1], [1]), new Ml.Pattern([1, 0], [1]), new Ml.Pattern([1, 1], [0])];
 
 network.train(patterns, 0.3, 0.8);
 
@@ -28,7 +28,7 @@ netowrk.solve(patterns[2]);
 
 netowrk.solve(patterns[3]);
 
-global.ai = ai;
+global.Ml = Ml;
 
 
 
@@ -118,15 +118,25 @@ Neuron = (function() {
 
 
   /**
+   * Get current weights
+   * @return {double[]}
+   */
+
+  getWeights()(function() {
+    return this.weights;
+  });
+
+
+  /**
    * Execute feed forward
-   * @param  {double[]} input
+   * @param  {double[]} previousOutput
    * @return {double}
    */
 
-  Neuron.prototype.forward = function(input) {
+  Neuron.prototype.forward = function(previousOutput) {
     var self;
     self = this;
-    return this.lastOutput = this.activationFunction.getActivationFunction()(input.reduce(function(previous, current, index) {
+    return this.output = this.activationFunction.getActivationFunction()(previousOutput.reduce(function(previous, current, index) {
       return previous += self.weights[index] * current;
     }, 0.0));
   };
@@ -134,11 +144,13 @@ Neuron = (function() {
 
   /**
    * Execute feed forward
-   * @param  {double} input
+   * @param  {double} backDeltaSum
    * @return {double}
    */
 
-  Neuron.prototype.back = function(input) {};
+  Neuron.prototype.back = function(backDeltaSum) {
+    return this.error = backDeltaSum * this.activationFunction.getDerivativeFunction()(this.output);
+  };
 
 
   /**
@@ -152,10 +164,7 @@ Neuron = (function() {
     i = this.weights.length;
     _results = [];
     while (i--) {
-      delta = learningRate * this.derivative[i] + this.lastDelta[i] * momentum;
-      this.weights[i] += delta;
-      this.lastDelta[i] = delta;
-      _results.push(this.deriv[i] = 0.0);
+      _results.push(delta = learningRate * this.derivative[i] + this.lastDelta[i] * momentum);
     }
     return _results;
   };
@@ -239,38 +248,42 @@ Layer = (function() {
 
   /**
    * Execute feed forward, calls forward on next layer
-   * @param  {double[]} input
+   * @param  {double[]} previousOutput
    * @return {double[]}
    */
 
-  Layer.prototype.forward = function(input) {
+  Layer.prototype.forward = function(previousOutput) {
     var output;
     output = this.neurons.map(function(neuron) {
-      return neuron.forward(input);
+      return neuron.forward(previousOutput);
     });
     if (this.next != null) {
       return this.next.forward(output);
     } else {
-      return output;
+      return previousOutput;
     }
   };
 
 
   /**
    * Execute feed back, calls back on prev layer
-   * @param  {double[]} input
+   * @param  {double[]} error
    * @return {double[]}
    */
 
-  Layer.prototype.back = function(expected) {
-    var output;
-    output = this.neurons.map(function(neuron) {
-      return neuron.back(expected);
+  Layer.prototype.back = function(backError) {
+    var error;
+    error = this.neurons.map(function(neuron, index) {
+      var backDeltaSum;
+      backDeltaSum = this.next.getNeurons().reduce(function(sum, nextNeuron) {
+        return sum += nextNeuron.getWeights()[index] * nextNeuron.error();
+      }, 0);
+      return neuron.back(backDeltaSum);
     });
     if (this.previous != null) {
-      return this.previous.back(output);
+      return this.previous.back(error);
     } else {
-      return output;
+      return error;
     }
   };
 
@@ -373,8 +386,9 @@ Network = (function() {
     _results = [];
     while (i--) {
       patterns.forEach(function(pattern) {
-        self.forward(pattern.getInput());
-        return self.back(pattern.getOutput());
+        var output;
+        output = self.forward(pattern.getInput());
+        return self.back(pattern.getOutput() - output);
       });
       _results.push(this.update(learningRate, momentum));
     }

@@ -1,4 +1,4 @@
-ai
+ml
 ==
 
-AI algorithms for JavaScript
+Machine learning algorithms for JavaScript

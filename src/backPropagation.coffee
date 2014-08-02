@@ -7,21 +7,27 @@ class Neuron
     ###
     init: (@weights) ->
     ###*
+     * Get current weights
+     * @return {double[]}
+    ###
+    getWeights() -> @weights
+    ###*
      * Execute feed forward
-     * @param  {double[]} input
+     * @param  {double[]} previousOutput
      * @return {double}
     ###
-    forward: (input) ->
+    forward: (previousOutput) ->
         self = this
-        @lastOutput = @activationFunction.getActivationFunction() input.reduce (previous, current, index) ->
+        @output = @activationFunction.getActivationFunction() previousOutput.reduce (previous, current, index) ->
             previous += self.weights[index] * current
         , 0.0
     ###*
      * Execute feed forward
-     * @param  {double} input
+     * @param  {double} backDeltaSum
      * @return {double}
     ###
-    back: (input) ->
+    back: (backDeltaSum) ->
+        @error = backDeltaSum * @activationFunction.getDerivativeFunction() @output
     ###*
      * Update the weights
      * @param {double} learningRate
@@ -31,9 +37,6 @@ class Neuron
         i = @weights.length
         while i--
             delta = learningRate * @derivative[i] + @lastDelta[i] * momentum
-            @weights[i] += delta
-            @lastDelta[i] = delta
-            @deriv[i] = 0.0
 
 class Layer
     ###*
@@ -74,22 +77,25 @@ class Layer
     getNext: () -> @next
     ###*
      * Execute feed forward, calls forward on next layer
-     * @param  {double[]} input
+     * @param  {double[]} previousOutput
      * @return {double[]}
     ###
-    forward: (input) ->
+    forward: (previousOutput) ->
         output = @neurons.map (neuron) ->
-            neuron.forward(input)
-        if @next? then @next.forward(output) else output
+            neuron.forward(previousOutput)
+        if @next? then @next.forward(output) else previousOutput
     ###*
      * Execute feed back, calls back on prev layer
-     * @param  {double[]} input
+     * @param  {double[]} error
      * @return {double[]}
     ###
-    back: (expected) ->
-        output = @neurons.map (neuron) ->
-            neuron.back(expected)
-        if @previous? then @previous.back(output) else output
+    back: (backError) ->
+        error = @neurons.map (neuron, index) ->
+            backDeltaSum = @next.getNeurons().reduce (sum, nextNeuron) ->
+                sum += nextNeuron.getWeights()[index] * nextNeuron.error()
+            , 0
+            neuron.back(backDeltaSum)
+        if @previous? then @previous.back(error) else error
     ###*
      * Update the neurons in this layer
      * @param {double} learningRate
@@ -139,8 +145,8 @@ class Network
         self = this
         while i--
             patterns.forEach (pattern) ->
-                self.forward pattern.getInput()
-                self.back pattern.getOutput()
+                output = self.forward pattern.getInput()
+                self.back pattern.getOutput() - output # TODO Array
             @update learningRate, momentum
     ###*
      * Solve the domain using this network
