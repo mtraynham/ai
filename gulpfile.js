@@ -11,7 +11,7 @@ var gulp = require('gulp'),
 
 gulp.task('lint', function () {
     return gulp.src('src/*.coffee')
-        .pipe(coffeeLint('.coffee-lint'))
+        .pipe(coffeeLint('.coffeelint.json'))
         .pipe(coffeeLint.reporter())
         .pipe(coffeeLint.reporter('fail'));
 });
@@ -54,7 +54,7 @@ gulp.task('setProduction', function () {
 var bumpFn = function (type) {
     gulp.src(['./bower.json', './package.json'])
         .pipe(bump({type: type}))
-        .pipe(gulp.dest('./'))
+        .pipe(gulp.dest('./'));
 };
 
 // Default Task
