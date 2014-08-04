@@ -51,7 +51,22 @@ gulp.task('setProduction', function () {
     global.isProduction = true;
 });
 
+var bumpFn = function (type) {
+    gulp.src(['./bower.json', './package.json'])
+        .pipe(bump({type: type}))
+        .pipe(gulp.dest('./'))
+};
+
 // Default Task
 gulp.task('default', ['lint', 'build']);
 gulp.task('watch', ['setProduction', 'setWatch', 'lint', 'build']);
-gulp.task('release', ['setProduction', 'lint', 'build'])
+gulp.task('release', ['setProduction', 'lint', 'build']);
+gulp.task('bump:major', function () {
+    bumpFn('major');
+});
+gulp.task('bump:minor', function () {
+    bumpFn('minor');
+});
+gulp.task('bump:patch', function () {
+    bumpFn('patch');
+});
