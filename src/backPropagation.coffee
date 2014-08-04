@@ -10,7 +10,7 @@ class Neuron
      * Get current weights
      * @return {double[]}
     ###
-    getWeights() -> @weights
+    getWeights: () -> @weights
     ###*
      * Execute feed forward
      * @param  {double[]} previousOutput

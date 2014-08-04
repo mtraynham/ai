@@ -122,9 +122,9 @@ Neuron = (function() {
    * @return {double[]}
    */
 
-  getWeights()(function() {
+  Neuron.prototype.getWeights = function() {
     return this.weights;
-  });
+  };
 
 
   /**
